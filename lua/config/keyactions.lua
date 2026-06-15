@@ -165,11 +165,21 @@ end
 -- Launch agy in a new OS window with specified working directory
 local function launch_agy_kitty_window(cwd)
   local socket = get_command_socket()
+  local folder_name = vim.fs.basename(cwd)
   local cmd
   if socket then
-    cmd = string.format("kitty @ --to=%s launch --type=os-window --cwd=%s agy", vim.fn.shellescape(socket), vim.fn.shellescape(cwd))
+    cmd = string.format(
+      "kitty @ --to=%s launch --type=os-window --cwd=%s --tab-title=%s agy",
+      vim.fn.shellescape(socket),
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(folder_name)
+    )
   else
-    cmd = string.format("kitty @ launch --type=os-window --cwd=%s agy", vim.fn.shellescape(cwd))
+    cmd = string.format(
+      "kitty @ launch --type=os-window --cwd=%s --tab-title=%s agy",
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(folder_name)
+    )
   end
   local output = vim.fn.system(cmd)
   local clean_output = output:gsub("%s+", "")
@@ -179,7 +189,14 @@ end
 
 -- Launch agy in a new tab in the OS window containing the matched window
 local function launch_agy_kitty_tab(socket, match_win_id, cwd)
-  local cmd = string.format("kitty @ --to=%s launch --type=tab --match=window_id:%d --cwd=%s agy", vim.fn.shellescape(socket), match_win_id, vim.fn.shellescape(cwd))
+  local folder_name = vim.fs.basename(cwd)
+  local cmd = string.format(
+    "kitty @ --to=%s launch --type=tab --match=window_id:%d --cwd=%s --tab-title=%s agy",
+    vim.fn.shellescape(socket),
+    match_win_id,
+    vim.fn.shellescape(cwd),
+    vim.fn.shellescape(folder_name)
+  )
   local output = vim.fn.system(cmd)
   local clean_output = output:gsub("%s+", "")
   local new_win_id = tonumber(clean_output)
