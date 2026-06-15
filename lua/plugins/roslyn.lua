@@ -1,7 +1,12 @@
+local has_sln = #vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, stop = vim.env.HOME }) > 0
+  or #vim.fn.glob("*.sln", true, true) > 0
+  or #vim.fn.glob("*/*.sln", true, true) > 0
+
 return {
   {
     "seblyng/roslyn.nvim",
     ft = { "cs", "razor" },
+    lazy = not has_sln,
     dependencies = {
       "Crashdummyy/mason-registry",
     },
