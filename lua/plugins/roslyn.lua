@@ -12,6 +12,7 @@ local function get_opened_dir()
 end
 
 local function get_solution_dir(target_dir)
+  if not target_dir or target_dir == "" then return nil end
   -- 1. Check upward for a .sln file
   local upward_sln = vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, path = target_dir, stop = vim.env.HOME })
   if #upward_sln > 0 then
@@ -36,6 +37,19 @@ end
 local target_dir = get_opened_dir():gsub("/+$", "")
 local solution_dir = get_solution_dir(target_dir)
 local has_sln = solution_dir ~= nil
+
+-- Automatically load the plugin if user changes directory to a C# solution
+vim.api.nvim_create_autocmd("DirChanged", {
+  callback = function()
+    local new_dir = vim.fn.getcwd()
+    local sol_dir = get_solution_dir(new_dir)
+    if sol_dir then
+      pcall(function()
+        require("lazy").load({ plugins = { "roslyn.nvim" } })
+      end)
+    end
+  end,
+})
 
 return {
   {
@@ -73,13 +87,31 @@ return {
       require("roslyn").setup(user_config)
       vim.lsp.config("roslyn", user_config.config)
 
+      -- Workaround: Force reload open C# buffers when project initialization completes
+      -- to clear stale "standalone" diagnostics.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "RoslynInitialized",
+        callback = function()
+          vim.schedule(function()
+            for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+              if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype == "cs" then
+                local ft = vim.bo[bufnr].filetype
+                vim.bo[bufnr].filetype = ""
+                vim.bo[bufnr].filetype = ft
+              end
+            end
+          end)
+        end,
+      })
+
       -- If we are in a C# solution, start the LSP immediately on the current startup buffer
-      if has_sln then
+      local current_sol_dir = get_solution_dir(vim.fn.getcwd()) or solution_dir
+      if current_sol_dir then
         vim.schedule(function()
           local config = vim.lsp.config["roslyn"]
           if config then
             local bufnr = vim.api.nvim_get_current_buf()
-            local start_config = vim.tbl_extend("force", config, { root_dir = solution_dir })
+            local start_config = vim.tbl_extend("force", config, { root_dir = current_sol_dir })
             vim.lsp.start(start_config, { bufnr = bufnr })
           end
         end)
