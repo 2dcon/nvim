@@ -522,5 +522,9 @@ function M.run_csharp_project()
   end, 200)
 end
 
+function M.show_quick_fixes()
+  vim.lsp.buf.code_action()
+end
+
 return M
 

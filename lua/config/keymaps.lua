@@ -4,6 +4,8 @@ local actions = require("config.keyactions")
 pcall(vim.keymap.del, "n", "<C-l>")
 pcall(vim.keymap.del, "v", "<C-l>")
 pcall(vim.keymap.del, "i", "<C-l>")
+pcall(vim.keymap.del, "i", "<C-/>")
+pcall(vim.keymap.del, "i", "<C-_>")
 
 ---- Duplicate lines
 -- 1. Edit Mode (Insert Mode): Duplicate current line and put cursor at the end
@@ -39,6 +41,10 @@ vim.keymap.set("v", "<C-l>", actions.ctrl_l_visual, { desc = "Run agy or copy re
 
 -- 4. Insert Mode: Send current line to agy terminal
 vim.keymap.set("i", "<C-l>", actions.ctrl_l_insert, { desc = "Send current line to agy", nowait = true, silent = true })
+
+-- 5. Insert Mode: Show quick fixes (code actions)
+vim.keymap.set("i", "<C-/>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
+vim.keymap.set("i", "<C-_>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
 
 -- 2. Update the keybind to call the global function
 vim.keymap.set({ "n", "i", "c" }, "<F5>", actions.run_csharp_project, { desc = "Run C# project in Kitty tab" })
