@@ -293,6 +293,25 @@ function M.delete_current_line()
 end
 
 function M.ctrl_l_normal()
+  if vim.bo.filetype == "neo-tree" then
+    local source = vim.b.neo_tree_source or "filesystem"
+    local success, manager = pcall(require, "neo-tree.sources.manager")
+    if success and manager then
+      local state = manager.get_state(source)
+      if state and state.tree then
+        local node = state.tree:get_node()
+        if node then
+          local path = node:get_id()
+          if path and path ~= "" then
+            local relative_path = vim.fn.fnamemodify(path, ":.")
+            handle_ctrl_l(relative_path .. " ")
+            return
+          end
+        end
+      end
+    end
+  end
+
   local nvim_cwd = vim.fn.getcwd()
   local kitty_socket, kitty_win_id, is_new_tab = get_or_create_agy_window(nvim_cwd)
 
