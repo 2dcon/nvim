@@ -118,7 +118,8 @@ return {
           if config then
             local bufnr = vim.api.nvim_get_current_buf()
             local start_config = vim.tbl_extend("force", config, { root_dir = current_sol_dir })
-            vim.lsp.start(start_config, { bufnr = bufnr })
+            -- Start client but do NOT attach it to the current buffer to prevent non-C# buffer errors
+            vim.lsp.start(start_config, { bufnr = bufnr, attach = false })
           end
         end)
       end
