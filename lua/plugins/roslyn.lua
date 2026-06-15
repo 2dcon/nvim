@@ -11,39 +11,40 @@ local function get_opened_dir()
   return vim.fn.getcwd()
 end
 
-local function get_solution_dir(target_dir)
-  if not target_dir or target_dir == "" then return nil end
+local function get_solution_info(target_dir)
+  if not target_dir or target_dir == "" then return nil, nil end
   -- 1. Check upward for a .sln file
   local upward_sln = vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, path = target_dir, stop = vim.env.HOME })
   if #upward_sln > 0 then
-    return vim.fs.dirname(upward_sln[1])
+    return vim.fs.dirname(upward_sln[1]), upward_sln[1]
   end
 
   -- 2. Check current directory for a .sln file
   local local_sln = vim.fn.glob(target_dir .. "/*.sln", true, true)
   if #local_sln > 0 then
-    return target_dir
+    return target_dir, local_sln[1]
   end
 
   -- 3. Check one level down for a .sln file
   local sub_sln = vim.fn.glob(target_dir .. "/*/*.sln", true, true)
   if #sub_sln > 0 then
-    return vim.fs.dirname(sub_sln[1])
+    return vim.fs.dirname(sub_sln[1]), sub_sln[1]
   end
 
-  return nil
+  return nil, nil
 end
 
 local target_dir = get_opened_dir():gsub("/+$", "")
-local solution_dir = get_solution_dir(target_dir)
+local solution_dir, sln_file = get_solution_info(target_dir)
 local has_sln = solution_dir ~= nil
 
 -- Automatically load the plugin if user changes directory to a C# solution
 vim.api.nvim_create_autocmd("DirChanged", {
   callback = function()
     local new_dir = vim.fn.getcwd()
-    local sol_dir = get_solution_dir(new_dir)
-    if sol_dir then
+    local sol_dir, s_file = get_solution_info(new_dir)
+    if sol_dir and s_file then
+      vim.g.roslyn_nvim_selected_solution = s_file
       pcall(function()
         require("lazy").load({ plugins = { "roslyn.nvim" } })
       end)
@@ -105,8 +106,13 @@ return {
       })
 
       -- If we are in a C# solution, start the LSP immediately on the current startup buffer
-      local current_sol_dir = get_solution_dir(vim.fn.getcwd()) or solution_dir
-      if current_sol_dir then
+      local current_sol_dir, current_sln_file = get_solution_info(vim.fn.getcwd())
+      if not current_sol_dir then
+        current_sol_dir, current_sln_file = solution_dir, sln_file
+      end
+
+      if current_sol_dir and current_sln_file then
+        vim.g.roslyn_nvim_selected_solution = current_sln_file
         vim.schedule(function()
           local config = vim.lsp.config["roslyn"]
           if config then
