@@ -49,6 +49,13 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
   group = vim.api.nvim_create_augroup("GitAutoPushConfig", { clear = true }),
   callback = function()
     local config_path = vim.fn.stdpath("config")
+    local cwd = vim.fn.getcwd()
+
+    -- Skip if current working directory is the config path (as GitAutoPushCWD will handle it)
+    if vim.fn.fnamemodify(cwd, ":p") == vim.fn.fnamemodify(config_path, ":p") then
+      return
+    end
+
     local git_dir = config_path .. "/.git"
 
     -- Check if Neovim config is a git repository
@@ -104,4 +111,73 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
     vim.fn.jobstart({ "sh", "-c", cmd }, { detach = true })
   end,
 })
+
+-- Auto-commit and push the current working directory if it's a git repo
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = vim.api.nvim_create_augroup("GitAutoPushCWD", { clear = true }),
+  callback = function()
+    local cwd = vim.fn.getcwd()
+
+    -- Check if CWD is inside a git repository
+    local is_git = vim.fn.system("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --is-inside-work-tree")
+    if vim.v.shell_error ~= 0 or vim.trim(is_git) ~= "true" then
+      return
+    end
+
+    -- Get absolute git directory path to check for active operations
+    local git_dir = vim.fn.system("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --absolute-git-dir")
+    if vim.v.shell_error ~= 0 then
+      return
+    end
+    git_dir = vim.trim(git_dir)
+
+    -- Skip auto-sync if a git operation (rebase, merge, cherry-pick, revert) is in progress
+    local git_ops_in_progress = vim.fn.isdirectory(git_dir .. "/rebase-merge") == 1
+      or vim.fn.isdirectory(git_dir .. "/rebase-apply") == 1
+      or vim.fn.filereadable(git_dir .. "/MERGE_HEAD") == 1
+      or vim.fn.filereadable(git_dir .. "/CHERRY_PICK_HEAD") == 1
+      or vim.fn.filereadable(git_dir .. "/REVERT_HEAD") == 1
+
+    if git_ops_in_progress then
+      return
+    end
+
+    -- Run git status to see if there are any changes
+    local status = vim.fn.system("git -C " .. vim.fn.shellescape(cwd) .. " status --porcelain")
+    if vim.v.shell_error ~= 0 then
+      return
+    end
+
+    status = vim.trim(status)
+    if status == "" then
+      return -- No changes to commit/push
+    end
+
+    -- Check for unresolved conflict markers in the git status output
+    for line in string.gmatch(status, "[^\r\n]+") do
+      local prefix = string.sub(line, 1, 2)
+      if prefix == "DD" or prefix == "AU" or prefix == "UD" or prefix == "UA" or prefix == "DU" or prefix == "AA" or prefix == "UU" then
+        return
+      end
+    end
+
+    -- Construct the git commit & push command
+    -- Message format: Backup@YY/MM/DD-HH:MM
+    local commit_msg = os.date("Backup@%y/%m/%d-%H:%M")
+    local log_file = cwd .. "/git-autopush.log"
+
+    local cmd = string.format(
+      "(git -C %s add -A && git -C %s commit -m %s && GIT_TERMINAL_PROMPT=0 git -C %s push) > %s 2>&1",
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(commit_msg),
+      vim.fn.shellescape(cwd),
+      vim.fn.shellescape(log_file)
+    )
+
+    -- Run the commands as a detached job (run-and-forget)
+    vim.fn.jobstart({ "sh", "-c", cmd }, { detach = true })
+  end,
+})
+
 
