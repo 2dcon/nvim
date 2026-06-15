@@ -45,9 +45,27 @@ vim.api.nvim_create_autocmd("DirChanged", {
     local sol_dir, s_file = get_solution_info(new_dir)
     if sol_dir and s_file then
       vim.g.roslyn_nvim_selected_solution = s_file
+      local loaded = false
       pcall(function()
-        require("lazy").load({ plugins = { "roslyn.nvim" } })
+        local lazy_config = require("lazy.core.config")
+        if lazy_config.plugins["roslyn.nvim"] and lazy_config.plugins["roslyn.nvim"]._.loaded then
+          loaded = true
+        end
       end)
+      if not loaded then
+        pcall(function()
+          require("lazy").load({ plugins = { "roslyn.nvim" } })
+        end)
+      else
+        vim.schedule(function()
+          local config = vim.lsp.config["roslyn"]
+          if config then
+            local bufnr = vim.api.nvim_get_current_buf()
+            local start_config = vim.tbl_extend("force", config, { root_dir = sol_dir })
+            vim.lsp.start(start_config, { bufnr = bufnr, attach = false })
+          end
+        end)
+      end
     end
   end,
 })
@@ -73,11 +91,6 @@ return {
         },
         config = {
           name = "roslyn", -- Explicitly name the server instance to satisfy _transport.lua
-          on_init = function(client)
-            if type(client.config.root_dir) == "function" then
-              client.config.root_dir = client.root_dir
-            end
-          end,
           on_attach = function(client, bufnr)
             -- Your LSP keymaps here
           end,
@@ -87,6 +100,24 @@ return {
 
       require("roslyn").setup(user_config)
       vim.lsp.config("roslyn", user_config.config)
+
+      -- Wrap the default config's on_init to resolve client.config.root_dir to a string
+      local roslyn_config = vim.lsp.config["roslyn"]
+      if roslyn_config then
+        local default_on_init = roslyn_config.on_init
+        roslyn_config.on_init = function(client)
+          if type(client.config.root_dir) == "function" then
+            client.config.root_dir = client.root_dir
+          end
+          if type(default_on_init) == "function" then
+            default_on_init(client)
+          elseif type(default_on_init) == "table" then
+            for _, fn in ipairs(default_on_init) do
+              fn(client)
+            end
+          end
+        end
+      end
 
       -- Workaround: Force reload open C# buffers when project initialization completes
       -- to clear stale "standalone" diagnostics.
