@@ -293,6 +293,7 @@ function M.delete_current_line()
 end
 
 function M.ctrl_l_normal()
+  vim.cmd("silent! wa")
   if vim.bo.filetype == "neo-tree" then
     local source = vim.b.neo_tree_source or "filesystem"
     local success, manager = pcall(require, "neo-tree.sources.manager")
@@ -336,6 +337,7 @@ function M.ctrl_l_normal()
 end
 
 function M.ctrl_l_visual()
+  vim.cmd("silent! wa")
   local relative_path = get_relative_path()
   if not relative_path then return end
 
@@ -365,6 +367,7 @@ function M.ctrl_l_visual()
 end
 
 function M.ctrl_l_insert()
+  vim.cmd("silent! wa")
   local line = vim.api.nvim_get_current_line()
   handle_ctrl_l(line .. "\n")
 end
