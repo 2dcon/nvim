@@ -61,6 +61,11 @@ vim.keymap.set("s", "<S-Down>", "<Down>")
 vim.keymap.set("s", "<BS>", "<C-o>c", { desc = "Delete Selection" })
 vim.keymap.set("s", "<Del>", "<C-o>c", { desc = "Delete Selection" })
 
+-- MODERN EDITOR BEHAVIOR: Copy/Paste with Ctrl+C and Ctrl+V
+vim.keymap.set({ "v", "s" }, "<C-c>", '"+y', { desc = "Copy selection" })
+vim.keymap.set("i", "<C-v>", "<C-r><C-o>+", { desc = "Paste clipboard" })
+vim.keymap.set({ "v", "s" }, "<C-v>", '"_c<C-r><C-o>+', { desc = "Paste clipboard over selection" })
+
 ---- Undo with Ctrl+Z
 vim.keymap.set("n", "<C-z>", "u", { desc = "Undo" })
 vim.keymap.set("i", "<C-z>", "<C-o>u", { desc = "Undo" })

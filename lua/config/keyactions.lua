@@ -150,13 +150,15 @@ end
 
 -- Send text to a specific kitty window on a specific socket
 local function send_text_to_kitty_window(socket, win_id, text)
-  local cmd = string.format("echo -n %s | kitty @ --to=%s send-text --match id:%d --stdin", vim.fn.shellescape(text), vim.fn.shellescape(socket), win_id)
+  local to_arg = (socket and socket ~= "") and string.format("--to=%s ", vim.fn.shellescape(socket)) or ""
+  local cmd = string.format("echo -n %s | kitty @ %ssend-text --match id:%d --stdin", vim.fn.shellescape(text), to_arg, win_id)
   vim.fn.system(cmd)
 end
 
 -- Focus a specific kitty window on a specific socket
 local function focus_kitty_window(socket, win_id)
-  local cmd = string.format("kitty @ --to=%s focus-window --match id:%d", vim.fn.shellescape(socket), win_id)
+  local to_arg = (socket and socket ~= "") and string.format("--to=%s ", vim.fn.shellescape(socket)) or ""
+  local cmd = string.format("kitty @ %sfocus-window --match id:%d", to_arg, win_id)
   vim.fn.system(cmd)
 end
 
@@ -169,7 +171,10 @@ local function launch_agy_kitty_window(cwd)
   else
     cmd = string.format("kitty @ launch --type=os-window --cwd=%s agy", vim.fn.shellescape(cwd))
   end
-  vim.fn.system(cmd)
+  local output = vim.fn.system(cmd)
+  local clean_output = output:gsub("%s+", "")
+  local new_win_id = tonumber(clean_output)
+  return socket, new_win_id
 end
 
 -- Launch agy in a new tab in the OS window containing the matched window
@@ -202,16 +207,14 @@ local function handle_ctrl_l(text)
   local kitty_socket, kitty_win_id, is_new_tab = get_or_create_agy_window(nvim_cwd)
 
   if kitty_socket and kitty_win_id then
-    -- Copy to clipboard and notify
-    vim.fn.setreg("+", text)
     if is_new_tab then
-      vim.notify("Copied: " .. text .. " (Opened new agy tab)", vim.log.levels.INFO)
+      vim.notify("Sent to agy: " .. text .. " (Opened new agy tab)", vim.log.levels.INFO)
       vim.defer_fn(function()
         send_text_to_kitty_window(kitty_socket, kitty_win_id, text)
         focus_kitty_window(kitty_socket, kitty_win_id)
       end, 150)
     else
-      vim.notify("Copied: " .. text, vim.log.levels.INFO)
+      vim.notify("Sent to agy: " .. text, vim.log.levels.INFO)
       send_text_to_kitty_window(kitty_socket, kitty_win_id, text)
       focus_kitty_window(kitty_socket, kitty_win_id)
     end
@@ -227,12 +230,14 @@ local function handle_ctrl_l(text)
     cwd = nvim_cwd
   end
 
-  -- Copy to clipboard and notify
-  vim.fn.setreg("+", text)
-  vim.notify("Copied: " .. text .. " (Opening new agy window)", vim.log.levels.INFO)
-
-  -- Launch new window running agy
-  launch_agy_kitty_window(cwd)
+  vim.notify("Sent to agy: " .. text .. " (Opening new agy window)", vim.log.levels.INFO)
+  local socket, new_win_id = launch_agy_kitty_window(cwd)
+  if new_win_id then
+    vim.defer_fn(function()
+      send_text_to_kitty_window(socket, new_win_id, text)
+      focus_kitty_window(socket, new_win_id)
+    end, 300)
+  end
 end
 
 function M.duplicate_lines()
