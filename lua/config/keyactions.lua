@@ -526,5 +526,9 @@ function M.show_quick_fixes()
   vim.lsp.buf.code_action()
 end
 
+function M.rename_symbol()
+  vim.lsp.buf.rename()
+end
+
 return M
 

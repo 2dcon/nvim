@@ -6,6 +6,8 @@ pcall(vim.keymap.del, "v", "<C-l>")
 pcall(vim.keymap.del, "i", "<C-l>")
 pcall(vim.keymap.del, "i", "<C-/>")
 pcall(vim.keymap.del, "i", "<C-_>")
+pcall(vim.keymap.del, "n", "<F2>")
+pcall(vim.keymap.del, "i", "<F2>")
 
 ---- Duplicate lines
 -- 1. Edit Mode (Insert Mode): Duplicate current line and put cursor at the end
@@ -45,6 +47,9 @@ vim.keymap.set("i", "<C-l>", actions.ctrl_l_insert, { desc = "Send current line 
 -- 5. Insert Mode: Show quick fixes (code actions)
 vim.keymap.set("i", "<C-/>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
 vim.keymap.set("i", "<C-_>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
+
+-- 6. Normal & Insert Modes: Rename symbol (variable/function)
+vim.keymap.set({ "n", "i" }, "<F2>", actions.rename_symbol, { desc = "Rename symbol", nowait = true, silent = true })
 
 -- 2. Update the keybind to call the global function
 vim.keymap.set({ "n", "i", "c" }, "<F5>", actions.run_csharp_project, { desc = "Run C# project in Kitty tab" })
