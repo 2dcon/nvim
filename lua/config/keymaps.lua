@@ -62,8 +62,8 @@ vim.keymap.set("s", "<BS>", "<C-o>c", { desc = "Delete Selection" })
 vim.keymap.set("s", "<Del>", "<C-o>c", { desc = "Delete Selection" })
 
 -- MODERN EDITOR BEHAVIOR: Copy/Paste with Ctrl+C and Ctrl+V
-vim.keymap.set("v", "<C-c>", '"+y', { desc = "Copy selection" })
-vim.keymap.set("s", "<C-c>", '<C-g>"+y', { desc = "Copy selection" })
+vim.keymap.set("v", "<C-c>", '"+yi', { desc = "Copy selection and enter insert mode" })
+vim.keymap.set("s", "<C-c>", '<C-g>"+yi', { desc = "Copy selection and enter insert mode" })
 vim.keymap.set("i", "<C-v>", "<C-r><C-o>+", { desc = "Paste clipboard" })
 vim.keymap.set("v", "<C-v>", '"_c<C-r><C-o>+', { desc = "Paste clipboard over selection" })
 vim.keymap.set("s", "<C-v>", '<C-g>"_c<C-r><C-o>+', { desc = "Paste clipboard over selection" })
