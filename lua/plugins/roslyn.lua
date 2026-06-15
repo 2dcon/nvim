@@ -11,10 +11,31 @@ local function get_opened_dir()
   return vim.fn.getcwd()
 end
 
+local function get_solution_dir(target_dir)
+  -- 1. Check upward for a .sln file
+  local upward_sln = vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, path = target_dir, stop = vim.env.HOME })
+  if #upward_sln > 0 then
+    return vim.fs.dirname(upward_sln[1])
+  end
+
+  -- 2. Check current directory for a .sln file
+  local local_sln = vim.fn.glob(target_dir .. "/*.sln", true, true)
+  if #local_sln > 0 then
+    return target_dir
+  end
+
+  -- 3. Check one level down for a .sln file
+  local sub_sln = vim.fn.glob(target_dir .. "/*/*.sln", true, true)
+  if #sub_sln > 0 then
+    return vim.fs.dirname(sub_sln[1])
+  end
+
+  return nil
+end
+
 local target_dir = get_opened_dir():gsub("/+$", "")
-local has_sln = #vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, path = target_dir, stop = vim.env.HOME }) > 0
-  or #vim.fn.glob(target_dir .. "/*.sln", true, true) > 0
-  or #vim.fn.glob(target_dir .. "/*/*.sln", true, true) > 0
+local solution_dir = get_solution_dir(target_dir)
+local has_sln = solution_dir ~= nil
 
 return {
   {
@@ -58,7 +79,7 @@ return {
           local config = vim.lsp.config["roslyn"]
           if config then
             local bufnr = vim.api.nvim_get_current_buf()
-            local start_config = vim.tbl_extend("force", config, { root_dir = target_dir })
+            local start_config = vim.tbl_extend("force", config, { root_dir = solution_dir })
             vim.lsp.start(start_config, { bufnr = bufnr })
           end
         end)
