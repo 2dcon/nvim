@@ -221,13 +221,17 @@ function M.delete_current_line()
 end
 
 function M.ctrl_l_normal()
-  local relative_path = get_relative_path()
-  if not relative_path then return end
-
-  local current_line = vim.fn.line(".")
-  local result = string.format("%s:%d", relative_path, current_line)
-
-  handle_ctrl_l(result)
+  local kitty_socket, kitty_win_id = find_agy_kitty_window()
+  if not (kitty_socket and kitty_win_id) then
+    local current_file = vim.api.nvim_buf_get_name(0)
+    local cwd
+    if current_file and current_file ~= "" then
+      cwd = vim.fs.dirname(current_file)
+    else
+      cwd = vim.fn.getcwd()
+    end
+    launch_agy_kitty_window(cwd)
+  end
 end
 
 function M.ctrl_l_visual()
@@ -255,7 +259,7 @@ function M.ctrl_l_visual()
 
   -- Schedule the handler to run after escaping visual mode
   vim.schedule(function()
-    handle_ctrl_l(result)
+    handle_ctrl_l(result .. " ")
   end)
 end
 
