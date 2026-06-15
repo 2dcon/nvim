@@ -1,6 +1,20 @@
-local has_sln = #vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, stop = vim.env.HOME }) > 0
-  or #vim.fn.glob("*.sln", true, true) > 0
-  or #vim.fn.glob("*/*.sln", true, true) > 0
+local function get_opened_dir()
+  local arg = vim.fn.argv(0)
+  if type(arg) == "string" and arg ~= "" then
+    local path = vim.fn.fnamemodify(arg, ":p")
+    if vim.fn.isdirectory(path) == 1 then
+      return path
+    else
+      return vim.fs.dirname(path)
+    end
+  end
+  return vim.fn.getcwd()
+end
+
+local target_dir = get_opened_dir():gsub("/+$", "")
+local has_sln = #vim.fs.find(function(name) return name:match("%.sln$") end, { limit = 1, upward = true, path = target_dir, stop = vim.env.HOME }) > 0
+  or #vim.fn.glob(target_dir .. "/*.sln", true, true) > 0
+  or #vim.fn.glob(target_dir .. "/*/*.sln", true, true) > 0
 
 return {
   {
@@ -44,7 +58,8 @@ return {
           local config = vim.lsp.config["roslyn"]
           if config then
             local bufnr = vim.api.nvim_get_current_buf()
-            vim.lsp.start(config, { bufnr = bufnr })
+            local start_config = vim.tbl_extend("force", config, { root_dir = target_dir })
+            vim.lsp.start(start_config, { bufnr = bufnr })
           end
         end)
       end
