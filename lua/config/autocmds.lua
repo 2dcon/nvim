@@ -64,7 +64,6 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
       or vim.fn.filereadable(git_dir .. "/REVERT_HEAD") == 1
 
     if git_ops_in_progress then
-      print("\n[GitAutoPush] Git operation in progress. Skipping auto-sync on exit.")
       return
     end
 
@@ -83,41 +82,26 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
     for line in string.gmatch(status, "[^\r\n]+") do
       local prefix = string.sub(line, 1, 2)
       if prefix == "DD" or prefix == "AU" or prefix == "UD" or prefix == "UA" or prefix == "DU" or prefix == "AA" or prefix == "UU" then
-        print("\n[GitAutoPush] Git conflicts detected. Skipping auto-sync on exit.")
-        vim.fn.input("Press ENTER to exit...")
         return
       end
     end
 
-    -- Print status message
-    print("\n[GitAutoPush] Syncing Neovim configuration to git...")
-
-    -- Stage changes
-    vim.fn.system("git -C " .. vim.fn.shellescape(config_path) .. " add -A")
-    if vim.v.shell_error ~= 0 then
-      vim.api.nvim_err_writeln("[GitAutoPush] Failed to stage config changes.")
-      vim.fn.input("Press ENTER to exit...")
-      return
-    end
-
-    -- Commit changes
+    -- Construct the git commit & push command
     local commit_msg = "Auto-commit: update config on exit (" .. os.date("%Y-%m-%d %H:%M:%S") .. ")"
-    vim.fn.system("git -C " .. vim.fn.shellescape(config_path) .. " commit -m " .. vim.fn.shellescape(commit_msg))
-    if vim.v.shell_error ~= 0 then
-      vim.api.nvim_err_writeln("[GitAutoPush] Failed to commit config changes.")
-      vim.fn.input("Press ENTER to exit...")
-      return
-    end
+    local log_file = config_path .. "/git-autopush.log"
 
-    -- Push changes (using GIT_TERMINAL_PROMPT=0 to prevent hanging on authentication prompts)
-    local push_cmd = "GIT_TERMINAL_PROMPT=0 git -C " .. vim.fn.shellescape(config_path) .. " push"
-    local push_out = vim.fn.system(push_cmd)
+    local cmd = string.format(
+      "(git -C %s add -A && git -C %s commit -m %s && GIT_TERMINAL_PROMPT=0 git -C %s push) > %s 2>&1",
+      vim.fn.shellescape(config_path),
+      vim.fn.shellescape(config_path),
+      vim.fn.shellescape(commit_msg),
+      vim.fn.shellescape(config_path),
+      vim.fn.shellescape(log_file)
+    )
 
-    if vim.v.shell_error ~= 0 then
-      vim.api.nvim_err_writeln("[GitAutoPush] Failed to push config changes:\n" .. push_out)
-      vim.fn.input("Press ENTER to exit...")
-    else
-      print("[GitAutoPush] Neovim configuration successfully pushed to remote!")
-    end
+    -- Run the commands as a detached job (run-and-forget).
+    -- This starts the processes in the background and allows Neovim to close instantly.
+    vim.fn.jobstart({ "sh", "-c", cmd }, { detach = true })
   end,
 })
+
