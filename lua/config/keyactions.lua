@@ -345,6 +345,11 @@ function M.ctrl_l_visual()
   end)
 end
 
+function M.ctrl_l_insert()
+  local line = vim.api.nvim_get_current_line()
+  handle_ctrl_l(line .. "\n")
+end
+
 local function get_free_port()
   local uv = vim.uv or vim.loop
   local server = uv.new_tcp()
