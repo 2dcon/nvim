@@ -117,7 +117,7 @@ local function find_agy_kitty_window()
               if tab.windows then
                 for _, win in ipairs(tab.windows) do
                   if is_agy_window(win) then
-                    return socket, win.id
+                    return socket, win.id, win.cwd
                   end
                 end
               end
@@ -127,7 +127,7 @@ local function find_agy_kitty_window()
       end
     end
   end
-  return nil, nil
+  return nil, nil, nil
 end
 
 -- Send text to a specific kitty window on a specific socket
@@ -154,27 +154,67 @@ local function launch_agy_kitty_window(cwd)
   vim.fn.system(cmd)
 end
 
+-- Launch agy in a new tab in the OS window containing the matched window
+local function launch_agy_kitty_tab(socket, match_win_id, cwd)
+  local cmd = string.format("kitty @ --to=%s launch --type=tab --match=window_id:%d --cwd=%s agy", vim.fn.shellescape(socket), match_win_id, vim.fn.shellescape(cwd))
+  local output = vim.fn.system(cmd)
+  local clean_output = output:gsub("%s+", "")
+  local new_win_id = tonumber(clean_output)
+  return new_win_id
+end
+
+-- Helper to check if two paths match, ignoring trailing slashes
+local function paths_match(p1, p2)
+  if not p1 or not p2 then return false end
+  local n1 = p1:gsub("/+$", "")
+  local n2 = p2:gsub("/+$", "")
+  return n1 == n2
+end
+
+-- Get existing agy window or create a new tab if working directory doesn't match
+local function get_or_create_agy_window(nvim_cwd)
+  local kitty_socket, kitty_win_id, win_cwd = find_agy_kitty_window()
+  if kitty_socket and kitty_win_id then
+    if not paths_match(win_cwd, nvim_cwd) then
+      local new_win_id = launch_agy_kitty_tab(kitty_socket, kitty_win_id, nvim_cwd)
+      if new_win_id then
+        return kitty_socket, new_win_id, true
+      end
+    end
+    return kitty_socket, kitty_win_id, false
+  end
+  return nil, nil, false
+end
+
 -- Handle the ctrl+l action: check for agy terminal, open one if missing, or paste if present
 local function handle_ctrl_l(text)
-  -- 1. Try to find a running agy instance in other Kitty windows (any socket)
-  local kitty_socket, kitty_win_id = find_agy_kitty_window()
+  local nvim_cwd = vim.fn.getcwd()
+  local kitty_socket, kitty_win_id, is_new_tab = get_or_create_agy_window(nvim_cwd)
+
   if kitty_socket and kitty_win_id then
     -- Copy to clipboard and notify
     vim.fn.setreg("+", text)
-    vim.notify("Copied: " .. text, vim.log.levels.INFO)
-    -- Send the text to the kitty window and focus it
-    send_text_to_kitty_window(kitty_socket, kitty_win_id, text)
-    focus_kitty_window(kitty_socket, kitty_win_id)
+    if is_new_tab then
+      vim.notify("Copied: " .. text .. " (Opened new agy tab)", vim.log.levels.INFO)
+      vim.defer_fn(function()
+        send_text_to_kitty_window(kitty_socket, kitty_win_id, text)
+        focus_kitty_window(kitty_socket, kitty_win_id)
+      end, 150)
+    else
+      vim.notify("Copied: " .. text, vim.log.levels.INFO)
+      send_text_to_kitty_window(kitty_socket, kitty_win_id, text)
+      focus_kitty_window(kitty_socket, kitty_win_id)
+    end
     return
   end
 
-  -- 2. Fallback: Create a new OS window, set its working directory to the current buffer directory, and run agy
+  -- Fallback: Create a new OS window
   local current_file = vim.api.nvim_buf_get_name(0)
   local cwd
   if current_file and current_file ~= "" then
     cwd = vim.fs.dirname(current_file)
   else
-    cwd = vim.fn.getcwd()
+    cwd = nvim_cwd
   end
 
   -- Copy to clipboard and notify
@@ -221,14 +261,24 @@ function M.delete_current_line()
 end
 
 function M.ctrl_l_normal()
-  local kitty_socket, kitty_win_id = find_agy_kitty_window()
-  if not (kitty_socket and kitty_win_id) then
+  local nvim_cwd = vim.fn.getcwd()
+  local kitty_socket, kitty_win_id, is_new_tab = get_or_create_agy_window(nvim_cwd)
+
+  if kitty_socket and kitty_win_id then
+    if is_new_tab then
+      vim.defer_fn(function()
+        focus_kitty_window(kitty_socket, kitty_win_id)
+      end, 150)
+    else
+      focus_kitty_window(kitty_socket, kitty_win_id)
+    end
+  else
     local current_file = vim.api.nvim_buf_get_name(0)
     local cwd
     if current_file and current_file ~= "" then
       cwd = vim.fs.dirname(current_file)
     else
-      cwd = vim.fn.getcwd()
+      cwd = nvim_cwd
     end
     launch_agy_kitty_window(cwd)
   end
