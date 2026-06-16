@@ -105,4 +105,9 @@ vim.keymap.set("n", "V", "<nop>", { desc = "Disable Visual line mode" })
 vim.keymap.set("n", "<C-v>", "<nop>", { desc = "Disable Visual block mode" })
 ---- Disable Visual mode keys ----
 
+---- Close current file with Ctrl+W
+vim.keymap.set({ "n", "i", "v", "s" }, "<C-w>", actions.close_current_file, { desc = "Close current file" })
+---- Close current file with Ctrl+W ----
+
+
 

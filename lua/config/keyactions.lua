@@ -616,6 +616,16 @@ function M.rename_symbol()
   vim.lsp.buf.rename()
 end
 
+function M.close_current_file()
+  local snacks_loaded, snacks = pcall(require, "snacks")
+  if snacks_loaded and snacks.bufdelete then
+    snacks.bufdelete()
+  else
+    vim.cmd("confirm bdelete")
+  end
+end
+
+
 M.review_state = { active = false }
 M.last_git_diff = ""
 
