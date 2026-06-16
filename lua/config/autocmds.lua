@@ -181,17 +181,25 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 })
 
 -- Automatically open Outline when opening a directory (folder)
+local function open_outline_if_dir()
+  local buf_name = vim.api.nvim_buf_get_name(0)
+  if buf_name ~= "" and vim.fn.isdirectory(buf_name) == 1 then
+    vim.schedule(function()
+      require("lazy").load({ plugins = { "outline.nvim" } })
+      pcall(vim.cmd, "OutlineOpen!")
+    end)
+  end
+end
+
+-- Run immediately when autocmds.lua loads (covers startup with a directory)
+open_outline_if_dir()
+
+-- Also watch for subsequent directory buffer entries
 vim.api.nvim_create_autocmd("BufEnter", {
   group = vim.api.nvim_create_augroup("OutlineAutoOpen", { clear = true }),
-  callback = function()
-    local buf_name = vim.api.nvim_buf_get_name(0)
-    if buf_name ~= "" and vim.fn.isdirectory(buf_name) == 1 then
-      vim.schedule(function()
-        pcall(vim.cmd, "OutlineOpen!")
-      end)
-    end
-  end,
+  callback = open_outline_if_dir,
 })
+
 
 
 
