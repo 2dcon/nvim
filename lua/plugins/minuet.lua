@@ -46,6 +46,8 @@ return {
         throttle = 0,        -- Disable throttling
         debounce = 100,      -- Trigger quickly after 100ms pause
         request_timeout = 60, -- Increase timeout to 60s to allow Ollama to load the model
+        -- Fix: Bypass environment proxy for local connections to 127.0.0.1
+        curl_extra_args = { "--noproxy", "127.0.0.1,localhost" },
       })
 
       -- Ensure that the auto-trigger is active for all loaded buffers immediately
