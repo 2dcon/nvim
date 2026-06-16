@@ -11,6 +11,11 @@ return {
         sidebars = "dark",
         floats = "dark",
       },
+      on_highlights = function(hl, c)
+        -- Make the active scope line (mini.indentscope) a subtle, dark slate blue
+        hl.MiniIndentscopeSymbol = { fg = "#3d59a1" }
+      end,
+
     },
   },
 
