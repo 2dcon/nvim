@@ -699,59 +699,100 @@ function M.agent_review_show_current()
   -- Open file
   vim.cmd("edit " .. vim.fn.fnameescape(file_path))
   
-  -- Open Gitsigns diff
-  vim.cmd("Gitsigns diffthis")
+  -- Defer to let gitsigns attach, open diff, and show prompt
+  vim.defer_fn(function()
+    if not M.review_state.active then return end
 
-  -- Set buffer-local keymaps
-  local bufnr = vim.api.nvim_get_current_buf()
-  vim.keymap.set("n", "<F9>", function() M.agent_review_action(true) end, { buffer = bufnr, silent = true, desc = "Accept agent changes" })
-  vim.keymap.set("n", "<F10>", function() M.agent_review_action(false) end, { buffer = bufnr, silent = true, desc = "Reject agent changes" })
+    -- Open Gitsigns diff
+    vim.cmd("Gitsigns diffthis")
 
-  -- Show floating prompt
-  local filename = vim.fs.basename(file_path)
-  local msg_buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_lines(msg_buf, 0, -1, false, {
-    " Reviewing: " .. filename .. " (" .. M.review_state.index .. "/" .. #M.review_state.files .. ")",
-    " [F9] Accept (keep changes)   [F10] Reject (discard changes)"
-  })
+    -- Set buffer-local keymaps
+    local bufnr = vim.api.nvim_get_current_buf()
+    local set_keys = function(buf)
+      vim.keymap.set("n", "<F9>", function() M.agent_review_action("accept") end, { buffer = buf, silent = true, desc = "Accept changes" })
+      vim.keymap.set("n", "<F10>", function() M.agent_review_action("accept_all") end, { buffer = buf, silent = true, desc = "Accept all changes" })
+      vim.keymap.set("n", "<F11>", function() M.agent_review_action("reject") end, { buffer = buf, silent = true, desc = "Reject changes" })
+      vim.keymap.set("n", "<F12>", function() M.agent_review_action("reject_all") end, { buffer = buf, silent = true, desc = "Reject all changes" })
+    end
+    set_keys(bufnr)
+    -- Also map keys for other windows/buffers in the current tab/split (just in case they focus the other diff buffer!)
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      local buf = vim.api.nvim_win_get_buf(win)
+      set_keys(buf)
+    end
 
-  local width = 65
-  local height = 2
-  local opts = {
-    relative = "editor",
-    width = width,
-    height = height,
-    row = vim.o.lines - height - 4,
-    col = math.floor((vim.o.columns - width) / 2),
-    style = "minimal",
-    border = "rounded",
-    focusable = false,
-  }
-  M.review_state.prompt_win = vim.api.nvim_open_win(msg_buf, false, opts)
-  M.review_state.prompt_buf = msg_buf
+    -- Show floating prompt
+    local filename = vim.fs.basename(file_path)
+    local msg_buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_lines(msg_buf, 0, -1, false, {
+      " Reviewing: " .. filename .. " (" .. M.review_state.index .. "/" .. #M.review_state.files .. ")",
+      " [F9] Accept    [F10] Accept All    [F11] Reject    [F12] Reject All"
+    })
+
+    local width = 72
+    local height = 2
+    local opts = {
+      relative = "editor",
+      width = width,
+      height = height,
+      row = vim.o.lines - height - 4,
+      col = math.floor((vim.o.columns - width) / 2),
+      style = "minimal",
+      border = "rounded",
+      focusable = false,
+    }
+    M.review_state.prompt_win = vim.api.nvim_open_win(msg_buf, false, opts)
+    M.review_state.prompt_buf = msg_buf
+  end, 100)
 end
 
-function M.agent_review_action(accept)
+function M.agent_review_action(action)
   if not M.review_state.active then return end
 
   local file_path = M.review_state.files[M.review_state.index]
 
-  if accept then
+  if action == "accept" then
     vim.fn.system("git add " .. vim.fn.shellescape(file_path))
     vim.notify("Accepted changes for: " .. file_path, vim.log.levels.INFO)
-  else
+    -- Close the current diff split
+    vim.cmd("diffoff")
+    pcall(vim.cmd, "close")
+    -- Move to next
+    M.review_state.index = M.review_state.index + 1
+    M.agent_review_show_current()
+
+  elseif action == "accept_all" then
+    for i = M.review_state.index, #M.review_state.files do
+      local path = M.review_state.files[i]
+      vim.fn.system("git add " .. vim.fn.shellescape(path))
+    end
+    -- Close the current diff split
+    vim.cmd("diffoff")
+    pcall(vim.cmd, "close")
+    M.agent_review_stop(true)
+
+  elseif action == "reject" then
     vim.fn.system("git checkout -- " .. vim.fn.shellescape(file_path))
     vim.cmd("edit!")
     vim.notify("Discarded changes for: " .. file_path, vim.log.levels.WARN)
+    -- Close the current diff split
+    vim.cmd("diffoff")
+    pcall(vim.cmd, "close")
+    -- Move to next
+    M.review_state.index = M.review_state.index + 1
+    M.agent_review_show_current()
+
+  elseif action == "reject_all" then
+    for i = M.review_state.index, #M.review_state.files do
+      local path = M.review_state.files[i]
+      vim.fn.system("git checkout -- " .. vim.fn.shellescape(path))
+    end
+    vim.cmd("edit!")
+    -- Close the current diff split
+    vim.cmd("diffoff")
+    pcall(vim.cmd, "close")
+    M.agent_review_stop(false)
   end
-
-  -- Close the current diff split
-  vim.cmd("diffoff")
-  pcall(vim.cmd, "close")
-
-  -- Move to next
-  M.review_state.index = M.review_state.index + 1
-  M.agent_review_show_current()
 end
 
 function M.agent_review_stop(completed)
