@@ -52,7 +52,8 @@ vim.keymap.set("i", "<C-_>", actions.show_quick_fixes, { desc = "Show quick fixe
 vim.keymap.set({ "n", "i" }, "<F2>", actions.rename_symbol, { desc = "Rename symbol", nowait = true, silent = true })
 
 -- 2. Update the keybind to call the global function
-vim.keymap.set({ "n", "i", "c" }, "<F5>", actions.run_csharp_project, { desc = "Run C# project in Kitty tab" })
+vim.keymap.set({ "n", "i", "c" }, "<F5>", function() actions.run_csharp_project(false) end, { desc = "Run C# project in Kitty pane" })
+vim.keymap.set({ "n", "i", "c" }, "<F6>", function() actions.run_csharp_project(true) end, { desc = "Run C# project in Kitty tab" })
 
 -- select mode
 local modes = { "i", "n", "v" }

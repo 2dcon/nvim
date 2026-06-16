@@ -398,7 +398,37 @@ if dap_ok then
   end
 end
 
-function M.run_csharp_project()
+-- Helper to find a kitty window by its title across all active sockets
+local function find_window_by_title(target_title)
+  local sockets = get_kitty_sockets()
+  for _, socket in ipairs(sockets) do
+    local ok, output = pcall(run_kitty_command, socket, "ls")
+    if ok and output and output ~= "" then
+      local ok_decode, data = pcall(vim.json.decode, output)
+      if ok_decode and data then
+        for _, os_win in ipairs(data) do
+          if os_win.tabs then
+            for _, tab in ipairs(os_win.tabs) do
+              if tab.windows then
+                for _, win in ipairs(tab.windows) do
+                  if win.title == target_title then
+                    return socket, win.id
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  return nil, nil
+end
+
+function M.run_csharp_project(new_tab)
+  if new_tab == nil then
+    new_tab = true
+  end
   vim.cmd("silent! wa")
   local current_file = vim.api.nvim_buf_get_name(0)
   
@@ -471,38 +501,80 @@ function M.run_csharp_project()
     f_init:close()
   end
 
-  -- 4. Launch netcoredbg in a new Kitty tab and tail the temp file
+  -- 4. Launch netcoredbg and tail the temp file
   local listen_on = vim.env.KITTY_LISTEN_ON
   local shell_cmd = string.format(
-    "touch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; echo; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s",
+    "touch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; echo; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s && exit",
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(netcoredbg_path),
     port,
     vim.fn.shellescape(temp_file)
   )
-  local cmd
-  if listen_on and listen_on ~= "" then
-    cmd = string.format(
-      "kitty @ --to=%s launch --type=tab --cwd=%s bash -c %s 2>&1",
-      vim.fn.shellescape(listen_on),
-      vim.fn.shellescape(csproj_dir),
-      vim.fn.shellescape(shell_cmd)
-    )
+
+  if new_tab then
+    local cmd
+    if listen_on and listen_on ~= "" then
+      cmd = string.format(
+        "kitty @ --to=%s launch --type=tab --cwd=%s bash -c %s 2>&1",
+        vim.fn.shellescape(listen_on),
+        vim.fn.shellescape(csproj_dir),
+        vim.fn.shellescape(shell_cmd)
+      )
+    else
+      vim.notify("KITTY_LISTEN_ON environment variable is not set. Please restart your Kitty terminal to apply the remote control socket configuration.", vim.log.levels.WARN)
+      cmd = string.format(
+        "kitty @ launch --type=tab --cwd=%s bash -c %s 2>&1",
+        vim.fn.shellescape(csproj_dir),
+        vim.fn.shellescape(shell_cmd)
+      )
+    end
+    
+    local output = vim.fn.system(cmd)
+    if vim.v.shell_error ~= 0 then
+      vim.notify("Kitty execution failed: " .. output, vim.log.levels.ERROR)
+      os.remove(temp_file)
+      return
+    end
   else
-    vim.notify("KITTY_LISTEN_ON environment variable is not set. Please restart your Kitty terminal to apply the remote control socket configuration.", vim.log.levels.WARN)
-    cmd = string.format(
-      "kitty @ launch --type=tab --cwd=%s bash -c %s 2>&1",
-      vim.fn.shellescape(csproj_dir),
-      vim.fn.shellescape(shell_cmd)
-    )
-  end
-  
-  local output = vim.fn.system(cmd)
-  if vim.v.shell_error ~= 0 then
-    vim.notify("Kitty execution failed: " .. output, vim.log.levels.ERROR)
-    os.remove(temp_file)
-    return
+    -- Pane version: reuse or launch new pane
+    local socket, win_id = find_window_by_title("csharp_dbg_pane")
+    if win_id then
+      -- Reuse existing pane: send Ctrl+C, then send command
+      send_text_to_kitty_window(socket or listen_on or "", win_id, "\x03")
+      vim.defer_fn(function()
+        send_text_to_kitty_window(socket or listen_on or "", win_id, shell_cmd .. "\n")
+      end, 100)
+    else
+      -- Launch new pane
+      local target_socket = listen_on or get_command_socket() or ""
+      local to_arg = (target_socket ~= "") and string.format("--to=%s ", vim.fn.shellescape(target_socket)) or ""
+      local launch_cmd = string.format(
+        "kitty @ %slaunch --type=window --location=hsplit --title=csharp_dbg_pane --cwd=%s bash 2>&1",
+        to_arg,
+        vim.fn.shellescape(csproj_dir)
+      )
+      local out = vim.fn.system(launch_cmd)
+      local clean_out = out:gsub("%s+", "")
+      local new_win_id = tonumber(clean_out)
+      if new_win_id then
+        vim.defer_fn(function()
+          send_text_to_kitty_window(target_socket, new_win_id, shell_cmd .. "\n")
+        end, 150)
+      else
+        vim.notify("Failed to launch kitty pane: " .. out, vim.log.levels.ERROR)
+        os.remove(temp_file)
+        return
+      end
+    end
+
+    -- Focus back to Neovim
+    local nvim_win_id = tonumber(vim.env.KITTY_WINDOW_ID)
+    if nvim_win_id then
+      vim.defer_fn(function()
+        focus_kitty_window(listen_on or "", nvim_win_id)
+      end, 200)
+    end
   end
 
   -- 5. Start DAP session connecting to the launched netcoredbg server
