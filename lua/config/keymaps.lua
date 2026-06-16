@@ -66,14 +66,15 @@ vim.keymap.set({ "n", "i", "c" }, "<F6>", function() actions.run_csharp_project(
 local modes = { "i", "n", "v" }
 
 -- Shift + Arrows to initiate selection across all modes
-vim.keymap.set("i", "<S-Up>", "<Esc>v<Up><C-g>", { desc = "Select Up" })
-vim.keymap.set("i", "<S-Down>", "<Esc>v<Down><C-g>", { desc = "Select Down" })
-vim.keymap.set("i", "<S-Left>", "<Esc>v<Left><C-g>", { desc = "Select Left" })
-vim.keymap.set("i", "<S-Right>", "<Esc>v<Right><C-g>", { desc = "Select Right" })
-vim.keymap.set("n", "<S-Up>", "v<Up><C-g>", { desc = "Select Up" })
-vim.keymap.set("n", "<S-Down>", "v<Down><C-g>", { desc = "Select Down" })
-vim.keymap.set("n", "<S-Left>", "v<Left><C-g>", { desc = "Select Left" })
-vim.keymap.set("n", "<S-Right>", "v<Right><C-g>", { desc = "Select Right" })
+vim.keymap.set("i", "<S-Up>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Up><C-g>", true, false, true), "n", false) end, { desc = "Select Up" })
+vim.keymap.set("i", "<S-Down>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Down><C-g>", true, false, true), "n", false) end, { desc = "Select Down" })
+vim.keymap.set("i", "<S-Left>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Left><C-g>", true, false, true), "n", false) end, { desc = "Select Left" })
+vim.keymap.set("i", "<S-Right>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Right><C-g>", true, false, true), "n", false) end, { desc = "Select Right" })
+vim.keymap.set("n", "<S-Up>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Up><C-g>", true, false, true), "n", false) end, { desc = "Select Up" })
+vim.keymap.set("n", "<S-Down>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Down><C-g>", true, false, true), "n", false) end, { desc = "Select Down" })
+vim.keymap.set("n", "<S-Left>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Left><C-g>", true, false, true), "n", false) end, { desc = "Select Left" })
+vim.keymap.set("n", "<S-Right>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Right><C-g>", true, false, true), "n", false) end, { desc = "Select Right" })
+
 
 -- Maintain the native selection block when holding shift inside Select Mode
 vim.keymap.set("s", "<S-Left>", "<Left>")
@@ -108,6 +109,11 @@ vim.keymap.set("n", "<C-v>", "<nop>", { desc = "Disable Visual block mode" })
 ---- Close current file with Ctrl+W
 vim.keymap.set({ "n", "i", "v", "s" }, "<C-w>", actions.close_current_file, { desc = "Close current file" })
 ---- Close current file with Ctrl+W ----
+
+---- Cancel selection and restore clipboard with Escape
+vim.keymap.set({ "v", "s" }, "<Esc>", actions.cancel_selection, { desc = "Cancel selection and restore clipboard" })
+---- Cancel selection and restore clipboard with Escape ----
+
 
 
 

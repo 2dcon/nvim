@@ -625,6 +625,30 @@ function M.close_current_file()
   end
 end
 
+M.saved_clipboard = nil
+
+function M.start_selection()
+  local mode = vim.api.nvim_get_mode().mode
+  if not mode:match("^[vVsS]") then
+    M.saved_clipboard = {
+      plus = vim.fn.getreg("+"),
+      star = vim.fn.getreg("*"),
+    }
+  end
+end
+
+function M.cancel_selection()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+  vim.schedule(function()
+    if M.saved_clipboard then
+      vim.fn.setreg("+", M.saved_clipboard.plus)
+      vim.fn.setreg("*", M.saved_clipboard.star)
+      M.saved_clipboard = nil
+    end
+  end)
+end
+
+
 
 M.review_state = { active = false }
 M.last_git_diff = ""
