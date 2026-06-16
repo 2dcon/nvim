@@ -13,7 +13,7 @@ return {
       },
       on_highlights = function(hl, c)
         -- Dim the active scope vertical line to a subtle dark slate blue
-        hl.SnacksIndentScope = { fg = "#9ccf7a" }
+        hl.SnacksIndentScope = { fg = "#547340" }
       end,
     },
   },
