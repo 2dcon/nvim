@@ -46,15 +46,3 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Auto-Outline**: Automatically opens the outline sidebar pane on the right-hand side when opening directories.
 * **Darker Backgrounds**: The TokyoNight colorscheme is configured to use the `"night"` style variant for a much darker editing background.
 
-### 8. AI-Powered Inline Predictions (Ollama & Minuet AI)
-* **Local Completion**: Powered by `minuet-ai.nvim` connecting to your local Ollama instance running the `gemma4:e4b` model.
-* **Inline Ghost Text Only**: Suggestions appear only as virtual text (ghost text) in your editor as you type, without appearing in or cluttering your standard `blink.cmp` IntelliSense completion menu.
-* **Keymaps**:
-  * `<Tab>`: Accept the entire suggestion (falls back to snippet/autocomplete cycle/indents if no suggestion is active).
-  * `<A-A>` (Alt + Shift + A): Alternate key to accept the entire suggestion.
-  * `<A-a>` (Alt + a): Accept a single line of the suggestion.
-  * `<A-[>` (Alt + [): Request completion manually, or cycle to the previous suggestion.
-  * `<A-]>` (Alt + ]): Request completion manually, or cycle to the next suggestion.
-  * `<A-e>` (Alt + e): Dismiss/Clear the current suggestion.
-
-
