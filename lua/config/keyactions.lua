@@ -503,14 +503,16 @@ function M.run_csharp_project(new_tab)
 
   -- 4. Launch netcoredbg and tail the temp file
   local listen_on = vim.env.KITTY_LISTEN_ON
-  local shell_cmd = string.format(
-    "touch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; echo; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s",
+  local dbg_cmd = string.format(
+    "touch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s",
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(netcoredbg_path),
     port,
     vim.fn.shellescape(temp_file)
   )
+  local prompt_cmd = "echo; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s"
+  local shell_cmd = dbg_cmd .. "; " .. prompt_cmd
 
   if new_tab then
     local cmd
@@ -537,13 +539,13 @@ function M.run_csharp_project(new_tab)
       return
     end
   else
+    local inner_pane_cmd = "echo; echo '====== execution started ======'; echo; " ..
+                           dbg_cmd ..
+                           "; echo; echo '====== execution ended ======'; echo; " ..
+                           prompt_cmd
     local pane_shell_cmd = string.format(
       "bash -c %s && (kitty @ ${KITTY_LISTEN_ON:+--to=$KITTY_LISTEN_ON} close-window --match id:$KITTY_WINDOW_ID || exit)",
-      vim.fn.shellescape(
-        "echo; echo '====== execution started ======'; echo; " ..
-        shell_cmd ..
-        "; echo; echo '====== execution ended ======'; echo"
-      )
+      vim.fn.shellescape(inner_pane_cmd)
     )
 
     -- Pane version: reuse or launch new pane
