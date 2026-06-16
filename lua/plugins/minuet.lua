@@ -40,6 +40,12 @@ return {
   {
     "saghen/blink.cmp",
     opts = {
+      completion = {
+        -- Disable blink.cmp's ghost text to prevent it from mirroring the completion menu as ghost text
+        ghost_text = {
+          enabled = false,
+        },
+      },
       keymap = {
         -- Check if Minuet suggestion is visible. If so, accept it; otherwise, fall back
         -- to snippet_forward, select_next, and Neovim's default tab/indent behavior.
