@@ -55,6 +55,9 @@ vim.keymap.set("v", "<C-_>", "gc", { remap = true, silent = true, desc = "Toggle
 -- 6. Normal & Insert Modes: Rename symbol (variable/function)
 vim.keymap.set({ "n", "i" }, "<F2>", actions.rename_symbol, { desc = "Rename symbol", nowait = true, silent = true })
 
+-- 6a. Git Review: Start agent changes review
+vim.keymap.set("n", "<leader>gr", actions.agent_review_start, { desc = "Start Agent Review", silent = true })
+
 -- 2. Update the keybind to call the global function
 vim.keymap.set({ "n", "i", "c" }, "<F5>", function() actions.run_csharp_project(false) end, { desc = "Run C# project in Kitty pane" })
 vim.keymap.set({ "n", "i", "c" }, "<F6>", function() actions.run_csharp_project(true) end, { desc = "Run C# project in Kitty tab" })

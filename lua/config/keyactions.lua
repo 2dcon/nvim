@@ -616,5 +616,154 @@ function M.rename_symbol()
   vim.lsp.buf.rename()
 end
 
+M.review_state = { active = false }
+M.last_git_diff = ""
+
+function M.agent_review_check_git()
+  if M.review_state.active then return end
+
+  local handle = io.popen("git diff --name-only")
+  if not handle then return end
+  local result = handle:read("*a")
+  handle:close()
+
+  result = vim.trim(result)
+  if result == "" then
+    M.last_git_diff = ""
+    return
+  end
+
+  if result == M.last_git_diff then
+    return
+  end
+
+  M.last_git_diff = result
+
+  vim.schedule(function()
+    local choice = vim.fn.confirm("Unstaged changes detected. Start review?", "&Yes\n&No", 2)
+    if choice == 1 then
+      M.agent_review_start()
+    end
+  end)
+end
+
+function M.agent_review_start()
+  if M.review_state.active then
+    vim.notify("Agent review is already active", vim.log.levels.WARN)
+    return
+  end
+
+  local handle = io.popen("git diff --name-only")
+  if not handle then return end
+  local result = handle:read("*a")
+  handle:close()
+
+  local files = {}
+  for file in string.gmatch(result, "[^\r\n]+") do
+    table.insert(files, file)
+  end
+
+  if #files == 0 then
+    vim.notify("No agent changes to review", vim.log.levels.INFO)
+    return
+  end
+
+  M.review_state = {
+    files = files,
+    index = 1,
+    active = true,
+    prompt_win = nil,
+    prompt_buf = nil,
+  }
+
+  M.agent_review_show_current()
+end
+
+function M.agent_review_show_current()
+  -- Clean up previous window
+  if M.review_state.prompt_win and vim.api.nvim_win_is_valid(M.review_state.prompt_win) then
+    vim.api.nvim_win_close(M.review_state.prompt_win, true)
+    M.review_state.prompt_win = nil
+  end
+
+  if M.review_state.index > #M.review_state.files then
+    M.agent_review_stop(true)
+    return
+  end
+
+  local file_path = M.review_state.files[M.review_state.index]
+  
+  -- Open file
+  vim.cmd("edit " .. vim.fn.fnameescape(file_path))
+  
+  -- Open Gitsigns diff
+  vim.cmd("Gitsigns diffthis")
+
+  -- Set buffer-local keymaps
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.keymap.set("n", "<F9>", function() M.agent_review_action(true) end, { buffer = bufnr, silent = true, desc = "Accept agent changes" })
+  vim.keymap.set("n", "<F10>", function() M.agent_review_action(false) end, { buffer = bufnr, silent = true, desc = "Reject agent changes" })
+
+  -- Show floating prompt
+  local filename = vim.fs.basename(file_path)
+  local msg_buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(msg_buf, 0, -1, false, {
+    " Reviewing: " .. filename .. " (" .. M.review_state.index .. "/" .. #M.review_state.files .. ")",
+    " [F9] Accept (keep changes)   [F10] Reject (discard changes)"
+  })
+
+  local width = 65
+  local height = 2
+  local opts = {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = vim.o.lines - height - 4,
+    col = math.floor((vim.o.columns - width) / 2),
+    style = "minimal",
+    border = "rounded",
+    focusable = false,
+  }
+  M.review_state.prompt_win = vim.api.nvim_open_win(msg_buf, false, opts)
+  M.review_state.prompt_buf = msg_buf
+end
+
+function M.agent_review_action(accept)
+  if not M.review_state.active then return end
+
+  local file_path = M.review_state.files[M.review_state.index]
+
+  if accept then
+    vim.fn.system("git add " .. vim.fn.shellescape(file_path))
+    vim.notify("Accepted changes for: " .. file_path, vim.log.levels.INFO)
+  else
+    vim.fn.system("git checkout -- " .. vim.fn.shellescape(file_path))
+    vim.cmd("edit!")
+    vim.notify("Discarded changes for: " .. file_path, vim.log.levels.WARN)
+  end
+
+  -- Close the current diff split
+  vim.cmd("diffoff")
+  pcall(vim.cmd, "close")
+
+  -- Move to next
+  M.review_state.index = M.review_state.index + 1
+  M.agent_review_show_current()
+end
+
+function M.agent_review_stop(completed)
+  if M.review_state.prompt_win and vim.api.nvim_win_is_valid(M.review_state.prompt_win) then
+    vim.api.nvim_win_close(M.review_state.prompt_win, true)
+  end
+
+  M.review_state = { active = false }
+
+  if completed then
+    vim.notify("Agent review completed!", vim.log.levels.INFO)
+  else
+    vim.notify("Agent review stopped", vim.log.levels.INFO)
+  end
+end
+
 return M
 

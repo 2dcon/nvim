@@ -200,6 +200,16 @@ vim.api.nvim_create_autocmd("BufEnter", {
   callback = open_outline_if_dir,
 })
 
+-- Automatically check for git changes on FocusGained to trigger agent review
+vim.api.nvim_create_autocmd("FocusGained", {
+  group = vim.api.nvim_create_augroup("AgentReviewTrigger", { clear = true }),
+  callback = function()
+    pcall(function()
+      require("config.keyactions").agent_review_check_git()
+    end)
+  end,
+})
+
 
 
 
