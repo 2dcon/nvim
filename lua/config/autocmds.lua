@@ -37,10 +37,14 @@ vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
 
 -- Automatically enter Insert Mode on mouse click for regular text files
 vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-  callback = function()
-    if vim.bo.modifiable and vim.bo.buftype == "" then
-      vim.keymap.set("n", "<LeftRelease>", "<LeftRelease>i", { buffer = true })
-    end
+  callback = function(ev)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(ev.buf) then
+        if vim.bo[ev.buf].modifiable and vim.bo[ev.buf].buftype == "" and vim.bo[ev.buf].filetype ~= "neo-tree" and vim.bo[ev.buf].filetype ~= "Outline" then
+          vim.keymap.set("n", "<LeftRelease>", "<LeftRelease>i", { buffer = ev.buf })
+        end
+      end
+    end)
   end,
 })
 
