@@ -13,7 +13,7 @@ return {
         before_cursor_filter_length = 1,
         provider_options = {
           openai_compatible = {
-            model = "gemma4:e4b",
+            model = "qwen3.5:4b",
             end_point = "http://127.0.0.1:11434/v1/chat/completions",
             api_key = "TERM",
             name = "Ollama",
