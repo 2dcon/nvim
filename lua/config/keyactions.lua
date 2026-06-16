@@ -622,7 +622,7 @@ M.last_git_diff = ""
 function M.agent_review_check_git()
   if M.review_state.active then return end
 
-  local handle = io.popen("git diff --name-only")
+  local handle = io.popen("git diff --name-only 2>/dev/null")
   if not handle then return end
   local result = handle:read("*a")
   handle:close()
@@ -653,7 +653,7 @@ function M.agent_review_start()
     return
   end
 
-  local handle = io.popen("git diff --name-only")
+  local handle = io.popen("git diff --name-only 2>/dev/null")
   if not handle then return end
   local result = handle:read("*a")
   handle:close()
