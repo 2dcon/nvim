@@ -36,12 +36,22 @@ return {
         },
       })
 
+      -- Ensure that the auto-trigger is active for all loaded buffers immediately
+      vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+        pattern = "*",
+        callback = function()
+          vim.b.minuet_virtual_text_auto_trigger = true
+        end,
+      })
+
       -- Register a debugging command to check if Minuet is initialized properly
       vim.api.nvim_create_user_command("MinuetDebug", function()
-        local config = require("minuet.config")
+        -- Fix: read the active config from the loaded module, not the defaults file
+        local config = require("minuet").config
         print("--- Minuet Debug Info ---")
         print("Minuet is loaded successfully!")
         print("Active Provider: " .. tostring(config.provider))
+        print("Auto Trigger Enabled for Buf: " .. tostring(vim.b.minuet_virtual_text_auto_trigger))
         if config.provider_options and config.provider_options.openai_compatible then
           print("Model: " .. tostring(config.provider_options.openai_compatible.model))
           print("Endpoint: " .. tostring(config.provider_options.openai_compatible.end_point))
