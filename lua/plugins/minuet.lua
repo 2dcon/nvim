@@ -21,11 +21,11 @@ return {
               top_p = 0.9,
               temperature = 0.2,
             },
-            -- Remove Authorization header as Ollama runs locally and does not require it
+            -- Fix: The transform function receives and returns a single table containing end_point, headers, and body
             transform = {
-              function(endpoint, headers, body)
-                headers["Authorization"] = nil
-                return endpoint, headers, body
+              function(data)
+                data.headers["Authorization"] = nil
+                return data
               end,
             },
           },
