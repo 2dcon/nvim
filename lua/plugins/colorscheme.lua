@@ -11,9 +11,12 @@ return {
         sidebars = "dark",
         floats = "dark",
       },
+      on_highlights = function(hl, c)
+        -- Dim the active scope vertical line to a subtle dark slate blue
+        hl.SnacksIndentScope = { fg = "#3d59a1" }
+      end,
     },
   },
-
 
   -- Set active colorscheme to tokyonight-night
   {
