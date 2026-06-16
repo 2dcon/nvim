@@ -640,10 +640,13 @@ function M.agent_review_check_git()
   M.last_git_diff = result
 
   vim.schedule(function()
-    local choice = vim.fn.confirm("Unstaged changes detected. Start review?", "&Yes\n&No", 2)
-    if choice == 1 then
-      M.agent_review_start()
-    end
+    vim.ui.select({ "Yes", "No" }, {
+      prompt = "Unstaged changes detected. Start review?",
+    }, function(choice)
+      if choice == "Yes" then
+        M.agent_review_start()
+      end
+    end)
   end)
 end
 
