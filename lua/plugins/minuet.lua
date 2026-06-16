@@ -34,6 +34,10 @@ return {
             dismiss = "<A-e>",     -- Alt + e to dismiss suggestion
           },
         },
+        -- Enable detailed notifications for debugging
+        notify = "debug",
+        throttle = 0,    -- Disable throttling
+        debounce = 100,  -- Trigger quickly after 100ms pause
       })
 
       -- Ensure that the auto-trigger is active for all loaded buffers immediately
@@ -46,7 +50,6 @@ return {
 
       -- Register a debugging command to check if Minuet is initialized properly
       vim.api.nvim_create_user_command("MinuetDebug", function()
-        -- Fix: read the active config from the loaded module, not the defaults file
         local config = require("minuet").config
         print("--- Minuet Debug Info ---")
         print("Minuet is loaded successfully!")
