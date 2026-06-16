@@ -6,36 +6,36 @@ return {
       "nvim-lua/plenary.nvim",
     },
     event = "VeryLazy", -- Load on VeryLazy so that autocommands register properly on startup
-    opts = {
-      provider = "openai_compatible",
-      provider_options = {
-        openai_compatible = {
-          model = "gemma4:e4b",
-          end_point = "http://127.0.0.1:11434/v1/chat/completions",
-          api_key = "TERM",
-          name = "Ollama",
-          stream = true,
-          optional = {
-            max_tokens = 256,
-            top_p = 0.9,
-            temperature = 0.2,
+    config = function()
+      require("minuet").setup({
+        provider = "openai_compatible",
+        provider_options = {
+          openai_compatible = {
+            model = "gemma4:e4b",
+            end_point = "http://127.0.0.1:11434/v1/chat/completions",
+            api_key = "TERM",
+            name = "Ollama",
+            stream = true,
+            optional = {
+              max_tokens = 256,
+              top_p = 0.9,
+              temperature = 0.2,
+            },
           },
         },
-      },
-      -- Enable Minuet's virtual text frontend to handle suggestions
-      virtualtext = {
-        auto_trigger_ft = { "*" }, -- Auto-trigger for all filetypes
-        keymap = {
-          accept = "<A-A>",      -- Keep Alt + Shift + A as a secondary accept key
-          accept_line = "<A-a>", -- Alt + a to accept a single line
-          prev = "<A-[>",        -- Alt + [ to trigger manually or cycle previous
-          next = "<A-]>",        -- Alt + ] to trigger manually or cycle next
-          dismiss = "<A-e>",     -- Alt + e to dismiss suggestion
+        -- Enable Minuet's virtual text frontend to handle suggestions
+        virtualtext = {
+          auto_trigger_ft = { "*" }, -- Auto-trigger for all filetypes
+          keymap = {
+            accept = "<A-A>",      -- Keep Alt + Shift + A as a secondary accept key
+            accept_line = "<A-a>", -- Alt + a to accept a single line
+            prev = "<A-[>",        -- Alt + [ to trigger manually or cycle previous
+            next = "<A-]>",        -- Alt + ] to trigger manually or cycle next
+            dismiss = "<A-e>",     -- Alt + e to dismiss suggestion
+          },
         },
-      },
-    },
-    config = function(_, opts)
-      require("minuet").setup(opts)
+      })
+
       -- Register a debugging command to check if Minuet is initialized properly
       vim.api.nvim_create_user_command("MinuetDebug", function()
         local config = require("minuet.config")
