@@ -503,17 +503,13 @@ function M.run_csharp_project(new_tab)
 
   -- 4. Launch netcoredbg and tail the temp file
   local listen_on = vim.env.KITTY_LISTEN_ON
-  local start_sep = new_tab and "" or "set +m; echo; echo '====== execution started ======'; echo; "
-  local end_sep = new_tab and "" or "echo; echo '====== execution ended ======'; echo; "
   local shell_cmd = string.format(
-    "%stouch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; %secho; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s && (kitty @ ${KITTY_LISTEN_ON:+--to=$KITTY_LISTEN_ON} close-window --match id:$KITTY_WINDOW_ID || exit)",
-    start_sep,
+    "touch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; echo; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s",
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(temp_file),
     vim.fn.shellescape(netcoredbg_path),
     port,
-    vim.fn.shellescape(temp_file),
-    end_sep
+    vim.fn.shellescape(temp_file)
   )
 
   if new_tab then
@@ -541,13 +537,22 @@ function M.run_csharp_project(new_tab)
       return
     end
   else
+    local pane_shell_cmd = string.format(
+      "bash -c %s && (kitty @ ${KITTY_LISTEN_ON:+--to=$KITTY_LISTEN_ON} close-window --match id:$KITTY_WINDOW_ID || exit)",
+      vim.fn.shellescape(
+        "echo; echo '====== execution started ======'; echo; " ..
+        shell_cmd ..
+        "; echo; echo '====== execution ended ======'; echo"
+      )
+    )
+
     -- Pane version: reuse or launch new pane
     local socket, win_id = find_window_by_title("csharp_dbg_pane")
     if win_id then
       -- Reuse existing pane: send Ctrl+C, then send command
       send_text_to_kitty_window(socket or listen_on or "", win_id, "\x03")
       vim.defer_fn(function()
-        send_text_to_kitty_window(socket or listen_on or "", win_id, shell_cmd .. "\n")
+        send_text_to_kitty_window(socket or listen_on or "", win_id, pane_shell_cmd .. "\n")
       end, 100)
     else
       -- Launch new pane
@@ -563,7 +568,7 @@ function M.run_csharp_project(new_tab)
       local new_win_id = tonumber(clean_out)
       if new_win_id then
         vim.defer_fn(function()
-          send_text_to_kitty_window(target_socket, new_win_id, shell_cmd .. "\n")
+          send_text_to_kitty_window(target_socket, new_win_id, pane_shell_cmd .. "\n")
         end, 150)
       else
         vim.notify("Failed to launch kitty pane: " .. out, vim.log.levels.ERROR)
