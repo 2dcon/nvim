@@ -22,33 +22,42 @@ return {
           },
         },
       },
-      -- Keep minuet's built-in virtualtext trigger disabled so it doesn't conflict with blink.cmp
+      -- Enable Minuet's virtual text frontend to handle suggestions
       virtualtext = {
-        auto_trigger_ft = {},
-        keymap = {},
+        auto_trigger_ft = { "*" }, -- Auto-trigger for all filetypes
+        keymap = {
+          accept = "<A-A>",      -- Keep Alt + Shift + A as a secondary accept key
+          accept_line = "<A-a>", -- Alt + a to accept a single line
+          prev = "<A-[>",        -- Alt + [ to trigger manually or cycle previous
+          next = "<A-]>",        -- Alt + ] to trigger manually or cycle next
+          dismiss = "<A-e>",     -- Alt + e to dismiss suggestion
+        },
       },
     },
   },
 
-  -- Integrate Minuet AI with blink.cmp
+  -- Integrate Minuet AI's Tab acceptance into blink.cmp
   {
     "saghen/blink.cmp",
     opts = {
-      completion = {
-        ghost_text = {
-          enabled = true,
+      keymap = {
+        -- Check if Minuet suggestion is visible. If so, accept it; otherwise, fall back
+        -- to snippet_forward, select_next, and Neovim's default tab/indent behavior.
+        ["<Tab>"] = {
+          function()
+            if require("minuet.virtualtext").action.is_visible() then
+              require("minuet.virtualtext").action.accept()
+              return true
+            end
+          end,
+          "snippet_forward",
+          "select_next",
+          "fallback",
         },
       },
       sources = {
-        -- Add 'minuet' to the default list of completion sources
-        default = { "lsp", "path", "snippets", "buffer", "minuet" },
-        providers = {
-          minuet = {
-            name = "minuet",
-            module = "minuet.blink",
-            score_offset = 100,
-          },
-        },
+        -- Do not add minuet here so it doesn't show in the dropdown menu
+        default = { "lsp", "path", "snippets", "buffer" },
       },
     },
   },

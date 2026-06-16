@@ -48,6 +48,13 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 
 ### 8. AI-Powered Inline Predictions (Ollama & Minuet AI)
 * **Local Completion**: Powered by `minuet-ai.nvim` connecting to your local Ollama instance running the `gemma4:e4b` model.
-* **Inline Ghost Text**: Suggestions appear natively as virtual text (ghost text) in your editor as you type, integrated directly into your `blink.cmp` completions.
-* **Keymaps**: Uses your standard `blink.cmp` keymaps (e.g. `<Tab>` or `<CR>` to accept, `<C-e>` to hide/dismiss).
+* **Inline Ghost Text Only**: Suggestions appear only as virtual text (ghost text) in your editor as you type, without appearing in or cluttering your standard `blink.cmp` IntelliSense completion menu.
+* **Keymaps**:
+  * `<Tab>`: Accept the entire suggestion (falls back to snippet/autocomplete cycle/indents if no suggestion is active).
+  * `<A-A>` (Alt + Shift + A): Alternate key to accept the entire suggestion.
+  * `<A-a>` (Alt + a): Accept a single line of the suggestion.
+  * `<A-[>` (Alt + [): Request completion manually, or cycle to the previous suggestion.
+  * `<A-]>` (Alt + ]): Request completion manually, or cycle to the next suggestion.
+  * `<A-e>` (Alt + e): Dismiss/Clear the current suggestion.
+
 
