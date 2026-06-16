@@ -9,6 +9,8 @@ return {
     config = function()
       require("minuet").setup({
         provider = "openai_compatible",
+        after_cursor_filter_length = 1,
+        before_cursor_filter_length = 1,
         provider_options = {
           openai_compatible = {
             model = "gemma4:e4b",
