@@ -44,7 +44,7 @@ return {
           },
         },
         -- Switch to warning/error notifications only to keep the editor quiet
-        notify = "warn",
+        notify = "debug",
         throttle = 1000,     -- Throttle requests to once per second to avoid CPU/GPU spikes
         debounce = 400,      -- Trigger suggestion 400ms after you stop typing
         request_timeout = 60, -- 60s timeout to allow Ollama to load the model on first run
