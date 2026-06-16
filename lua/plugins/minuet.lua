@@ -21,7 +21,7 @@ return {
               top_p = 0.9,
               temperature = 0.2,
             },
-            -- Fix: The transform function receives and returns a single table containing end_point, headers, and body
+            -- The transform function receives and returns a single table containing end_point, headers, and body
             transform = {
               function(data)
                 data.headers["Authorization"] = nil
@@ -41,12 +41,12 @@ return {
             dismiss = "<A-e>",     -- Alt + e to dismiss suggestion
           },
         },
-        -- Enable detailed notifications for debugging
-        notify = "debug",
-        throttle = 0,        -- Disable throttling
-        debounce = 100,      -- Trigger quickly after 100ms pause
-        request_timeout = 60, -- Increase timeout to 60s to allow Ollama to load the model
-        -- Fix: Bypass environment proxy for local connections to 127.0.0.1
+        -- Switch to warning/error notifications only to keep the editor quiet
+        notify = "warn",
+        throttle = 1000,     -- Throttle requests to once per second to avoid CPU/GPU spikes
+        debounce = 400,      -- Trigger suggestion 400ms after you stop typing
+        request_timeout = 60, -- 60s timeout to allow Ollama to load the model on first run
+        -- Bypass environment proxy for local connections to 127.0.0.1
         curl_extra_args = { "--noproxy", "127.0.0.1,localhost" },
       })
 
@@ -57,21 +57,6 @@ return {
           vim.b.minuet_virtual_text_auto_trigger = true
         end,
       })
-
-      -- Register a debugging command to check if Minuet is initialized properly
-      vim.api.nvim_create_user_command("MinuetDebug", function()
-        local config = require("minuet").config
-        print("--- Minuet Debug Info ---")
-        print("Minuet is loaded successfully!")
-        print("Active Provider: " .. tostring(config.provider))
-        print("Auto Trigger Enabled for Buf: " .. tostring(vim.b.minuet_virtual_text_auto_trigger))
-        if config.provider_options and config.provider_options.openai_compatible then
-          print("Model: " .. tostring(config.provider_options.openai_compatible.model))
-          print("Endpoint: " .. tostring(config.provider_options.openai_compatible.end_point))
-        else
-          print("openai_compatible configuration not found under provider_options!")
-        end
-      end, {})
     end,
   },
 
