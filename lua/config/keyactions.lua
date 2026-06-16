@@ -503,7 +503,7 @@ function M.run_csharp_project(new_tab)
 
   -- 4. Launch netcoredbg and tail the temp file
   local listen_on = vim.env.KITTY_LISTEN_ON
-  local start_sep = new_tab and "" or "echo; echo '====== execution started ======'; echo; "
+  local start_sep = new_tab and "" or "set +m; echo; echo '====== execution started ======'; echo; "
   local end_sep = new_tab and "" or "echo; echo '====== execution ended ======'; echo; "
   local shell_cmd = string.format(
     "%stouch %s && tail -n +1 -f %s & TAIL_PID=$!; %s --server=%d --interpreter=vscode; kill $TAIL_PID; rm %s; %secho; echo 'Debugger session finished. Press any key to close...'; read -n 1 -s && (kitty @ ${KITTY_LISTEN_ON:+--to=$KITTY_LISTEN_ON} close-window --match id:$KITTY_WINDOW_ID || exit)",
