@@ -16,7 +16,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
   * `<C-c>` in visual/select modes copies the selection to the system clipboard and enters insert mode.
   * `<C-v>` in insert/visual/select modes pastes the system clipboard (overwriting selection if active).
   * `<BS>` / `<Del>` in select mode deletes selection and returns to insert mode.
-* **Auto Insert Mode on Click**: Clicking inside a regular editor pane or terminal pane automatically triggers Insert mode. Special panes like Neo-tree and Outline are excluded from this behavior.
+* **Auto Insert Mode on Click & Exit**: Clicking inside a regular editor pane or terminal pane automatically triggers Insert mode. Conversely, focusing non-editor/non-terminal panes (like Neo-tree or Outline) will automatically exit Insert mode.
 
 ### 2. Shift Selection (Keyboard text selection)
 * **Arrow Selection**: Holding `<S-Up>`, `<S-Down>`, `<S-Left>`, or `<S-Right>` in insert or normal mode initiates select mode (mimicking standard GUI editors).

@@ -48,6 +48,27 @@ vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
   end,
 })
 
+-- Automatically exit Insert Mode when focusing non-editor/non-terminal panes
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+  callback = function(ev)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(ev.buf) then
+        local buftype = vim.bo[ev.buf].buftype
+        local filetype = vim.bo[ev.buf].filetype
+        local modifiable = vim.bo[ev.buf].modifiable
+        
+        local mode = vim.api.nvim_get_mode().mode
+        if string.sub(mode, 1, 1) == "i" then
+          local is_special = not modifiable or buftype ~= "" or filetype == "neo-tree" or filetype == "Outline"
+          if is_special and buftype ~= "terminal" then
+            vim.cmd("stopinsert")
+          end
+        end
+      end
+    end)
+  end,
+})
+
 -- Auto-commit and push Neovim config changes when exiting Neovim
 vim.api.nvim_create_autocmd("VimLeavePre", {
   group = vim.api.nvim_create_augroup("GitAutoPushConfig", { clear = true }),
