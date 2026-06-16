@@ -5,7 +5,7 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
-    event = "InsertEnter",
+    event = "VeryLazy", -- Load on VeryLazy so that autocommands register properly on startup
     opts = {
       provider = "openai_compatible",
       provider_options = {
@@ -34,6 +34,22 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("minuet").setup(opts)
+      -- Register a debugging command to check if Minuet is initialized properly
+      vim.api.nvim_create_user_command("MinuetDebug", function()
+        local config = require("minuet.config")
+        print("--- Minuet Debug Info ---")
+        print("Minuet is loaded successfully!")
+        print("Active Provider: " .. tostring(config.provider))
+        if config.provider_options and config.provider_options.openai_compatible then
+          print("Model: " .. tostring(config.provider_options.openai_compatible.model))
+          print("Endpoint: " .. tostring(config.provider_options.openai_compatible.end_point))
+        else
+          print("openai_compatible configuration not found under provider_options!")
+        end
+      end, {})
+    end,
   },
 
   -- Integrate Minuet AI's Tab acceptance into blink.cmp
