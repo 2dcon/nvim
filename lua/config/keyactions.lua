@@ -656,22 +656,67 @@ M.last_git_diff = ""
 function M.agent_review_check_git()
   if M.review_state.active then return end
 
+  local review_file = "/dev/shm/agent_review_files.txt"
+  local f = io.open(review_file, "r")
+  if not f then return end
+  
+  -- Read first line to check workspace
+  local first_line = f:read("*l")
+  if not first_line then
+    f:close()
+    return
+  end
+
+  local tracking_workspace = first_line:match("^workspace=(.+)$")
+  if not tracking_workspace then
+    f:close()
+    return
+  end
+
+  -- Compare tracking workspace with Neovim's current working directory
+  local cwd = vim.fn.getcwd():gsub("/+$", "")
+  tracking_workspace = vim.trim(tracking_workspace):gsub("/+$", "")
+  if cwd ~= tracking_workspace then
+    f:close()
+    return
+  end
+
+  -- Read the rest of the file
+  local content = f:read("*a")
+  f:close()
+
+  if not content or vim.trim(content) == "" then return end
+
+  local agent_files = {}
+  for line in string.gmatch(content, "[^\r\n]+") do
+    local file_path = vim.trim(line)
+    if file_path ~= "" and not file_path:match("^workspace=") then
+      local abspath = vim.fn.fnamemodify(file_path, ":p")
+      agent_files[abspath] = true
+    end
+  end
+
   local handle = io.popen("git diff --name-only 2>/dev/null")
   if not handle then return end
-  local result = handle:read("*a")
+  local git_diff_output = handle:read("*a")
   handle:close()
 
-  result = vim.trim(result)
-  if result == "" then
-    M.last_git_diff = ""
-    return
+  local has_agent_changes = false
+  for file in string.gmatch(git_diff_output, "[^\r\n]+") do
+    local abspath = vim.fn.fnamemodify(vim.trim(file), ":p")
+    if agent_files[abspath] then
+      has_agent_changes = true
+      break
+    end
   end
 
-  if result == M.last_git_diff then
+  if not has_agent_changes then return end
+
+  local git_diff_trimmed = vim.trim(git_diff_output)
+  if git_diff_trimmed == M.last_git_diff then
     return
   end
-
-  M.last_git_diff = result
+  M.last_git_diff = git_diff_trimmed
 
   vim.schedule(function()
     vim.ui.select({ "Yes", "No" }, {
@@ -679,10 +724,14 @@ function M.agent_review_check_git()
     }, function(choice)
       if choice == "Yes" then
         M.agent_review_start()
+      else
+        os.remove(review_file)
       end
     end)
   end)
 end
+
+
 
 function M.agent_review_start()
   if M.review_state.active then
@@ -835,6 +884,8 @@ function M.agent_review_stop(completed)
   end
 
   M.review_state = { active = false }
+
+  os.remove("/dev/shm/agent_review_files.txt")
 
   if completed then
     vim.notify("Agent review completed!", vim.log.levels.INFO)
