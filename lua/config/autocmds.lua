@@ -180,4 +180,18 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
   end,
 })
 
+-- Automatically open Outline when opening a directory (folder)
+vim.api.nvim_create_autocmd("BufEnter", {
+  group = vim.api.nvim_create_augroup("OutlineAutoOpen", { clear = true }),
+  callback = function()
+    local buf_name = vim.api.nvim_buf_get_name(0)
+    if buf_name ~= "" and vim.fn.isdirectory(buf_name) == 1 then
+      vim.schedule(function()
+        pcall(vim.cmd, "OutlineOpen!")
+      end)
+    end
+  end,
+})
+
+
 
