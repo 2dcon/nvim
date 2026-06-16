@@ -63,10 +63,12 @@ vim.keymap.set({ "n", "i", "c" }, "<F6>", function() actions.run_csharp_project(
 local modes = { "i", "n", "v" }
 
 -- Shift + Arrows to initiate selection across all modes
-vim.keymap.set(modes, "<S-Up>", "<Action>(v:count1 . 'v<Up>')", { expr = true })
-vim.keymap.set(modes, "<S-Down>", "<Action>(v:count1 . 'v<Down>')", { expr = true })
+vim.keymap.set("i", "<S-Up>", "<Esc>v<Up><C-g>", { desc = "Select Up" })
+vim.keymap.set("i", "<S-Down>", "<Esc>v<Down><C-g>", { desc = "Select Down" })
 vim.keymap.set("i", "<S-Left>", "<Esc>v<Left><C-g>", { desc = "Select Left" })
 vim.keymap.set("i", "<S-Right>", "<Esc>v<Right><C-g>", { desc = "Select Right" })
+vim.keymap.set("n", "<S-Up>", "v<Up><C-g>", { desc = "Select Up" })
+vim.keymap.set("n", "<S-Down>", "v<Down><C-g>", { desc = "Select Down" })
 vim.keymap.set("n", "<S-Left>", "v<Left><C-g>", { desc = "Select Left" })
 vim.keymap.set("n", "<S-Right>", "v<Right><C-g>", { desc = "Select Right" })
 
