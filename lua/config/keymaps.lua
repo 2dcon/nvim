@@ -44,9 +44,13 @@ vim.keymap.set("v", "<C-l>", actions.ctrl_l_visual, { desc = "Run agy or copy re
 -- 4. Insert Mode: Send current line to agy terminal
 vim.keymap.set("i", "<C-l>", actions.ctrl_l_insert, { desc = "Send current line to agy", nowait = true, silent = true })
 
--- 5. Insert Mode: Show quick fixes (code actions)
-vim.keymap.set("i", "<C-/>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
-vim.keymap.set("i", "<C-_>", actions.show_quick_fixes, { desc = "Show quick fixes", nowait = true, silent = true })
+-- 5. Insert Mode: Toggle comment line
+vim.keymap.set("i", "<C-/>", "<Esc>gccgi", { remap = true, silent = true, desc = "Toggle comment line" })
+vim.keymap.set("i", "<C-_>", "<Esc>gccgi", { remap = true, silent = true, desc = "Toggle comment line" })
+
+-- 5a. Visual & Select Mode: Toggle comment selection
+vim.keymap.set("v", "<C-/>", "gc", { remap = true, silent = true, desc = "Toggle comment selection" })
+vim.keymap.set("v", "<C-_>", "gc", { remap = true, silent = true, desc = "Toggle comment selection" })
 
 -- 6. Normal & Insert Modes: Rename symbol (variable/function)
 vim.keymap.set({ "n", "i" }, "<F2>", actions.rename_symbol, { desc = "Rename symbol", nowait = true, silent = true })
