@@ -21,6 +21,13 @@ return {
               top_p = 0.9,
               temperature = 0.2,
             },
+            -- Remove Authorization header as Ollama runs locally and does not require it
+            transform = {
+              function(endpoint, headers, body)
+                headers["Authorization"] = nil
+                return endpoint, headers, body
+              end,
+            },
           },
         },
         -- Enable Minuet's virtual text frontend to handle suggestions
@@ -36,8 +43,9 @@ return {
         },
         -- Enable detailed notifications for debugging
         notify = "debug",
-        throttle = 0,    -- Disable throttling
-        debounce = 100,  -- Trigger quickly after 100ms pause
+        throttle = 0,        -- Disable throttling
+        debounce = 100,      -- Trigger quickly after 100ms pause
+        request_timeout = 60, -- Increase timeout to 60s to allow Ollama to load the model
       })
 
       -- Ensure that the auto-trigger is active for all loaded buffers immediately
