@@ -70,10 +70,15 @@ vim.keymap.set("i", "<S-Up>", function() actions.start_selection() vim.api.nvim_
 vim.keymap.set("i", "<S-Down>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Down><C-g>", true, false, true), "n", false) end, { desc = "Select Down" })
 vim.keymap.set("i", "<S-Left>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Left><C-g>", true, false, true), "n", false) end, { desc = "Select Left" })
 vim.keymap.set("i", "<S-Right>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v<Right><C-g>", true, false, true), "n", false) end, { desc = "Select Right" })
+vim.keymap.set("i", "<S-Home>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v0<C-g>", true, false, true), "n", false) end, { desc = "Select to Start of Line" })
+vim.keymap.set("i", "<S-End>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>v$<C-g>", true, false, true), "n", false) end, { desc = "Select to End of Line" })
+
 vim.keymap.set("n", "<S-Up>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Up><C-g>", true, false, true), "n", false) end, { desc = "Select Up" })
 vim.keymap.set("n", "<S-Down>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Down><C-g>", true, false, true), "n", false) end, { desc = "Select Down" })
 vim.keymap.set("n", "<S-Left>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Left><C-g>", true, false, true), "n", false) end, { desc = "Select Left" })
 vim.keymap.set("n", "<S-Right>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v<Right><C-g>", true, false, true), "n", false) end, { desc = "Select Right" })
+vim.keymap.set("n", "<S-Home>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v0<C-g>", true, false, true), "n", false) end, { desc = "Select to Start of Line" })
+vim.keymap.set("n", "<S-End>", function() actions.start_selection() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("v$<C-g>", true, false, true), "n", false) end, { desc = "Select to End of Line" })
 
 
 -- Maintain the native selection block when holding shift inside Select Mode
@@ -81,6 +86,9 @@ vim.keymap.set("s", "<S-Left>", "<Left>")
 vim.keymap.set("s", "<S-Right>", "<Right>")
 vim.keymap.set("s", "<S-Up>", "<Up>")
 vim.keymap.set("s", "<S-Down>", "<Down>")
+vim.keymap.set("s", "<S-Home>", "<Home>")
+vim.keymap.set("s", "<S-End>", "<End>")
+
 
 -- MODERN EDITOR BEHAVIOR: Make Backspace and Delete wipe out the selection
 -- and instantly return you to Insert Mode
