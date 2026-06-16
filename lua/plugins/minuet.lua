@@ -22,6 +22,7 @@ return {
               max_tokens = 256,
               top_p = 0.9,
               temperature = 0.2,
+              reasoning_effort = "none",
             },
             -- The transform function receives and returns a single table containing end_point, headers, and body
             transform = {
@@ -44,7 +45,7 @@ return {
           },
         },
         -- Switch to warning/error notifications only to keep the editor quiet
-        notify = "debug",
+        notify = "warn",
         throttle = 1000,     -- Throttle requests to once per second to avoid CPU/GPU spikes
         debounce = 400,      -- Trigger suggestion 400ms after you stop typing
         request_timeout = 60, -- 60s timeout to allow Ollama to load the model on first run
