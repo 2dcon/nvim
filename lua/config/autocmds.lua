@@ -281,9 +281,10 @@ hide_cursor()
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "Outline",
   callback = function()
-    vim.keymap.set("n", "<2-LeftMouse>", "<CR>", { buffer = true, silent = true, desc = "Jump to symbol on double-click" })
+    vim.keymap.set("n", "<2-LeftMouse>", "<CR>", { buffer = true, silent = true, remap = true, desc = "Jump to symbol on double-click" })
   end,
 })
+
 
 
 
