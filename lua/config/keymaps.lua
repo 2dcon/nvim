@@ -141,9 +141,24 @@ vim.keymap.set("i", "<M-w>", actions.accept_copilot_word, { desc = "Accept next 
 -- Accept next line of Copilot inline suggestion in Insert mode using Alt+l
 vim.keymap.set("i", "<M-l>", actions.accept_copilot_line, { desc = "Accept next line of Copilot suggestion", silent = true })
 
+-- MODERN EDITOR BEHAVIOR: Wrap visual/select selection with parentheses/quotes when typing them
+local wrap_pairs = {
+  ["("] = { "(", ")" },
+  [")"] = { "(", ")" },
+  ["["] = { "[", "]" },
+  ["]"] = { "[", "]" },
+  ["{"] = { "{", "}" },
+  ["}"] = { "{", "}" },
+  ['"'] = { '"', '"' },
+  ["'"] = { "'", "'" },
+  ["`"] = { "`", "`" },
+}
 
-
-
-
-
+for key, val in pairs(wrap_pairs) do
+  local open_char, close_char = val[1], val[2]
+  -- Visual mode mapping: yank to register x, change selection to black hole, insert pair, paste register x
+  vim.keymap.set("x", key, string.format('"xygv"_c%s%s<Esc>"xP', open_char, close_char), { desc = "Wrap selection in " .. open_char .. close_char })
+  -- Select mode mapping: switch to visual mode using <C-g>, then do the same
+  vim.keymap.set("s", key, string.format('<C-g>"xygv"_c%s%s<Esc>"xP', open_char, close_char), { desc = "Wrap selection in " .. open_char .. close_char })
+end
 
