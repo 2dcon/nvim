@@ -43,6 +43,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 ### 6. File Explorer Improvements (Neo-tree)
 * **Copy Paths (`Y`)**: Pressing `Y` inside Neo-tree opens a dropdown menu allowing you to copy the node's absolute path, relative path, or filename directly to the system clipboard.
 * **Single Click to Open**: Clicking a file with `<LeftRelease>` opens it immediately in the editor. Clicking a directory expands or collapses it.
+* **Right Click to Select**: Right-clicking a file or directory selects/highlights it in the sidebar without opening or toggling it, and disables the default right-click popup menu.
 
 ### 7. Layout & UI Customization
 * **Auto-Outline**: Automatically opens the outline sidebar pane on the right-hand side when opening directories.
