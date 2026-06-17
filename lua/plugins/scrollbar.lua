@@ -1,24 +1,13 @@
 return {
-  "petertriho/nvim-scrollbar",
+  "dstein64/nvim-scrollview",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
-    local scrollbar = require("scrollbar")
     local colors = require("tokyonight.colors").setup()
-    scrollbar.setup({
-      show = true,
-      handle = {
-        text = " ",
-        blend = 30,
-        color = colors.bg_highlight,
-      },
-      marks = {
-        Search = { color = colors.orange, priority = 0 },
-        Error = { color = colors.error, priority = 1 },
-        Warn = { color = colors.warning, priority = 2 },
-        Info = { color = colors.info, priority = 3 },
-        Hint = { color = colors.hint, priority = 4 },
-        Misc = { color = colors.dark3, priority = 5 },
-      },
+    vim.api.nvim_set_hl(0, "ScrollView", { bg = colors.bg_highlight })
+
+    require("scrollview").setup({
+      current_only = true,
+      signs_on_startup = { "diagnostics", "search", "conflicts" },
       excluded_filetypes = {
         "cmp_menu",
         "cmp_docs",
