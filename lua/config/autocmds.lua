@@ -235,6 +235,22 @@ vim.api.nvim_create_autocmd("FocusGained", {
   end,
 })
 
+-- Hide cursor in neo-tree and Outline sidebars to keep a clean interface
+local cursor_hl_group = vim.api.nvim_create_augroup("SidebarCursorHide", { clear = true })
+vim.api.nvim_set_hl(0, "CursorTransparent", { fg = "NONE", bg = "NONE", blend = 100 })
 
-
-
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+  group = cursor_hl_group,
+  callback = function()
+    local ft = vim.bo.filetype
+    if ft == "neo-tree" or ft == "Outline" then
+      if not string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
+        vim.opt.guicursor:append("n-v-ve:CursorTransparent/lCursorTransparent")
+      end
+    else
+      if string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
+        vim.opt.guicursor:remove("n-v-ve:CursorTransparent/lCursorTransparent")
+      end
+    end
+  end,
+})
