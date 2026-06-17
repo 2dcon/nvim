@@ -5,13 +5,6 @@ return {
       window = {
         mappings = {
           ["<LeftRelease>"] = "open",
-          ["<RightMouse>"] = function()
-            local pos = vim.fn.getmousepos()
-            if pos.winid == vim.api.nvim_get_current_win() and pos.line > 0 then
-              vim.api.nvim_win_set_cursor(0, { pos.line, 0 })
-            end
-          end,
-          ["<RightRelease>"] = function() end,
           ["Y"] = function(state)
             local node = state.tree:get_node()
             local filepath = node:get_id()
