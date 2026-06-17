@@ -46,6 +46,8 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Auto-Outline**: Automatically opens the outline sidebar pane on the right-hand side when opening directories.
 * **Darker Backgrounds**: The TokyoNight colorscheme is configured to use the `"night"` style variant for a much darker editing background.
 * **Global Hidden Cursor in Normal Mode**: Uses terminal escape sequences to completely hide the cursor in Normal mode globally across all buffers and sidebars. This ensures the cursor is completely transparent and the character underneath it is rendered normally without any blocks or lines, while restoring the cursor in all other modes (like Visual, Insert, and Command-line).
+* **Outline Double-Click Jump**: Maps double-click (`<2-LeftMouse>`) buffer-locally inside the Outline window to automatically jump to the selected symbol's position (equivalent to pressing `<CR>` or Enter). This also prevents the default word-selection behavior which was causing the cursor to temporarily become visible.
+
 
 
 
