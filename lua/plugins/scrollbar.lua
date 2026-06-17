@@ -3,22 +3,21 @@ return {
   event = { "BufReadPost", "BufNewFile" },
   config = function()
     local scrollbar = require("scrollbar")
+    local colors = require("tokyonight.colors").setup()
     scrollbar.setup({
       show = true,
       handle = {
         text = " ",
         blend = 30,
-        color = nil,
-        color_nr = nil,
-        highlight = "CursorColumn",
+        color = colors.bg_highlight,
       },
       marks = {
-        Search = { text = { "-", "=" }, priority = 0, highlight = "Search" },
-        Error = { text = { " ", " " }, priority = 1, highlight = "DiagnosticSignError" },
-        Warn = { text = { " ", " " }, priority = 2, highlight = "DiagnosticSignWarn" },
-        Info = { text = { " ", " " }, priority = 3, highlight = "DiagnosticSignInfo" },
-        Hint = { text = { " ", " " }, priority = 4, highlight = "DiagnosticSignHint" },
-        Misc = { text = { " ", " " }, priority = 5, highlight = "Normal" },
+        Search = { color = colors.orange, priority = 0 },
+        Error = { color = colors.error, priority = 1 },
+        Warn = { color = colors.warning, priority = 2 },
+        Info = { color = colors.info, priority = 3 },
+        Hint = { color = colors.hint, priority = 4 },
+        Misc = { color = colors.dark3, priority = 5 },
       },
       excluded_filetypes = {
         "cmp_menu",
