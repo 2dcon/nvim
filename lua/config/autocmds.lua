@@ -225,6 +225,45 @@ vim.api.nvim_create_autocmd("BufEnter", {
   callback = open_outline_if_dir,
 })
 
+-- Update outline selection highlight whenever the editor cursor's line changes
+vim.api.nvim_create_autocmd("CursorMoved", {
+  group = vim.api.nvim_create_augroup("OutlineFollowCursorGlobal", { clear = true }),
+  callback = function()
+    local ok, outline = pcall(require, "outline")
+    if not ok then return end
+    
+    local sidebar = outline._get_sidebar()
+    if not (sidebar and sidebar.view:is_open() and sidebar.flats) then
+      return
+    end
+
+    local current_buf = vim.api.nvim_get_current_buf()
+    if current_buf == sidebar.view.buf then
+      return
+    end
+
+    local current_win = vim.api.nvim_get_current_win()
+    local current_line = vim.api.nvim_win_get_cursor(current_win)[1]
+
+    local last_line = vim.w[current_win].last_outline_hover_line
+    if last_line == current_line then
+      return
+    end
+    vim.w[current_win].last_outline_hover_line = current_line
+
+    pcall(function()
+      local hovered_line = current_line - 1
+      for _, node in ipairs(sidebar.flats) do
+        node.hovered = (node.line == hovered_line or (hovered_line >= node.range_start and hovered_line <= node.range_end))
+      end
+
+      local hl = require("outline.highlight")
+      hl.clear_hovers(sidebar.view.buf)
+      hl.hovers(sidebar.view.buf, sidebar.flats)
+    end)
+  end,
+})
+
 -- Automatically check for git changes on FocusGained to trigger agent review
 vim.api.nvim_create_autocmd("FocusGained", {
   group = vim.api.nvim_create_augroup("AgentReviewTrigger", { clear = true }),
