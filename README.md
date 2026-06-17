@@ -59,7 +59,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Outline Auto-Jump**: Configured `outline.nvim` to automatically jump to the corresponding code symbol in the editor as soon as an item is selected or single-clicked in the outline sidebar. It automatically handles instant highlight updates and snaps the cursor column to 0 to prevent selection shifting issues.
 * **Vertical Scrollbar (`nvim-scrollview`)**: Adds an interactive vertical scrollbar on the right side of windows. Supports clicking and dragging to scroll/navigate the editor, and displays marks for search results, git conflicts, and LSP diagnostics.
 * **Absolute Line Numbers**: Configured the editor to show absolute line numbers globally instead of hybrid/relative line numbers.
-* **LSP Reference Underlines**: Overrode the LSP document reference highlights (`LspReferenceText`/`Read`/`Write`) to use clean double underlines instead of background blocks, preventing contrast and readability conflicts on dimmed/unused variables and functions.
+* **LSP Reference Highlights**: Overrode the LSP document reference highlights (`LspReferenceText`/`Read`/`Write`) to use reversed/inverted colors (swapping foreground and background) instead of solid background blocks, preventing contrast and readability conflicts on dimmed/unused variables and functions.
 
 
 
