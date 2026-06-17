@@ -6,6 +6,7 @@ return {
     vim.api.nvim_set_hl(0, "ScrollView", { bg = colors.bg_highlight })
 
     require("scrollview").setup({
+      winblend = 0,
       current_only = true,
       signs_on_startup = { "diagnostics", "search", "conflicts" },
       excluded_filetypes = {
