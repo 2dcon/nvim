@@ -235,58 +235,27 @@ vim.api.nvim_create_autocmd("FocusGained", {
   end,
 })
 
--- Option C: Completely hide/show terminal cursor globally in Normal mode
-local term_cursor_group = vim.api.nvim_create_augroup("TerminalCursorHide", { clear = true })
-
-local function hide_cursor()
-  if vim.api.nvim_get_mode().mode == "n" then
-    io.write("\27[?25l")
-  end
-end
-
--- Hide on mode entry
-vim.api.nvim_create_autocmd("ModeChanged", {
-  group = term_cursor_group,
-  pattern = "*:n",
-  callback = hide_cursor,
-})
-
--- Show on mode exit
-vim.api.nvim_create_autocmd("ModeChanged", {
-  group = term_cursor_group,
-  pattern = "n:*",
-  callback = function()
-    io.write("\27[?25h")
-  end,
-})
-
--- Re-assert cursor hidden state on events that trigger redraws/focus changes
-vim.api.nvim_create_autocmd({ "CursorMoved", "WinEnter", "BufEnter", "SafeState", "VimResized" }, {
-  group = term_cursor_group,
-  callback = hide_cursor,
-})
-
--- Ensure cursor is restored when leaving or suspending Neovim
-vim.api.nvim_create_autocmd({ "VimLeave", "VimSuspend" }, {
-  group = term_cursor_group,
-  callback = function()
-    io.write("\27[?25h")
-  end,
-})
-
--- Hide cursor immediately on load if starting in Normal mode
-hide_cursor()
-
--- Map double-click in Outline buffer to go to symbol position (CR)
+-- Map single-click inside Outline buffer to select, or jump if already selected
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "Outline",
   callback = function()
-    -- Jump to symbol on double-click (covers all modes to handle selection transitions)
-    vim.keymap.set({ "n", "v", "s", "x" }, "<2-LeftMouse>", "<CR>", { buffer = true, silent = true, remap = true, desc = "Jump to symbol on double-click" })
-    -- Disable drag-selection across modes to prevent visual jumping glitches
-    vim.keymap.set({ "n", "v", "s", "x" }, "<LeftDrag>", "<Nop>", { buffer = true, silent = true })
+    vim.keymap.set("n", "<LeftMouse>", function()
+      local pos = vim.fn.getmousepos()
+      if pos.winid == vim.api.nvim_get_current_win() and pos.line > 0 then
+        local current_line = vim.api.nvim_win_get_cursor(0)[1]
+        if pos.line == current_line then
+          -- Item was already selected, trigger the outline jump action
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "m", true)
+        else
+          -- Select/move cursor to the item in outline
+          vim.api.nvim_win_set_cursor(0, { pos.line, 0 })
+        end
+      end
+    end, { buffer = true, silent = true, desc = "Select item or jump to symbol if already selected" })
   end,
 })
+
+
 
 
 
