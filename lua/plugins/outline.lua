@@ -4,7 +4,7 @@ return {
     opts = {
       outline_window = {
         auto_jump = true,
-        show_cursorline = false,
+        -- show_cursorline = false,
       },
     },
   },
