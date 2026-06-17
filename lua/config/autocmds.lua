@@ -271,6 +271,25 @@ vim.api.nvim_create_autocmd({ "VimLeave", "VimSuspend" }, {
 -- Hide cursor immediately on load if starting in Normal mode
 hide_cursor()
 
+-- Map double-click in Outline buffer to go to symbol position (CR)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "Outline",
+  callback = function()
+    -- Jump to symbol on double-click (covers all modes)
+    vim.keymap.set({ "n", "v", "s", "x" }, "<2-LeftMouse>", function()
+      local pos = vim.fn.getmousepos()
+      if pos.winid == vim.api.nvim_get_current_win() and pos.line > 0 then
+        vim.api.nvim_win_set_cursor(0, { pos.line, 0 })
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "m", true)
+      end
+    end, { buffer = true, silent = true, desc = "Jump to symbol on double-click" })
+    
+    -- Disable drag-selection across modes to prevent visual jumping glitches
+    vim.keymap.set({ "n", "v", "s", "x" }, "<LeftDrag>", "<Nop>", { buffer = true, silent = true })
+  end,
+})
+
+
 
 
 
