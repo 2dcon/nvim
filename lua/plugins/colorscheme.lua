@@ -14,6 +14,10 @@ return {
       on_highlights = function(hl, c)
         -- Dim the active scope vertical line to a subtle dark slate blue
         hl.SnacksIndentScope = { fg = "#9c9854" }
+        -- Clean underline for LSP references instead of background highlights
+        hl.LspReferenceText = { underline = true, bg = "none" }
+        hl.LspReferenceRead = { underline = true, bg = "none" }
+        hl.LspReferenceWrite = { underline = true, bg = "none" }
       end,
     },
   },
