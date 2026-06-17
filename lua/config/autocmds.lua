@@ -237,20 +237,50 @@ vim.api.nvim_create_autocmd("FocusGained", {
 
 -- Hide cursor in neo-tree and Outline sidebars to keep a clean interface
 local cursor_hl_group = vim.api.nvim_create_augroup("SidebarCursorHide", { clear = true })
-vim.api.nvim_set_hl(0, "CursorTransparent", { fg = "NONE", bg = "NONE", blend = 100 })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-  group = cursor_hl_group,
-  callback = function()
-    local ft = vim.bo.filetype
-    if ft == "neo-tree" or ft == "Outline" then
-      if not string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
-        vim.opt.guicursor:append("n-v-ve:CursorTransparent/lCursorTransparent")
-      end
-    else
-      if string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
-        vim.opt.guicursor:remove("n-v-ve:CursorTransparent/lCursorTransparent")
+local function get_sidebar_bg()
+  local winhl = vim.wo.winhighlight
+  local normal_hl = "Normal"
+  if winhl and winhl ~= "" then
+    for pair in string.gmatch(winhl, "[^,]+") do
+      local from, to = string.match(pair, "([^:]+):([^:]+)")
+      if from == "Normal" then
+        normal_hl = to
+        break
       end
     end
-  end,
+  end
+
+  local hl = vim.api.nvim_get_hl(0, { name = normal_hl, link = false })
+  return hl and hl.bg or "NONE"
+end
+
+local function update_cursor()
+  local ft = vim.bo.filetype
+  if ft == "neo-tree" or ft == "Outline" then
+    local bg_color = get_sidebar_bg()
+    vim.api.nvim_set_hl(0, "CursorTransparent", {
+      fg = bg_color,
+      bg = bg_color,
+      blend = 100,
+      reverse = false,
+      nocombine = true,
+    })
+    if not string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
+      vim.opt.guicursor:append("n-v-ve:ver1-CursorTransparent/lCursorTransparent")
+    end
+  else
+    if string.find(vim.api.nvim_get_option_value("guicursor", {}), "CursorTransparent") then
+      vim.opt.guicursor:remove("n-v-ve:ver1-CursorTransparent/lCursorTransparent")
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter", "BufWinEnter", "FileType" }, {
+  group = cursor_hl_group,
+  callback = update_cursor,
 })
+
+-- Run immediately on load for the current buffer
+update_cursor()
+
