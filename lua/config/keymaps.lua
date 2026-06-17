@@ -133,6 +133,12 @@ vim.keymap.set("i", "<M-c>", function()
   end)
 end, { desc = "Dismiss Copilot suggestion", silent = true })
 
+-- Accept next word of Copilot inline suggestion in Insert mode using Alt+w
+vim.keymap.set("i", "<M-w>", actions.accept_copilot_word, { desc = "Accept next word of Copilot suggestion", silent = true })
+
+-- Accept next line of Copilot inline suggestion in Insert mode using Alt+l
+vim.keymap.set("i", "<M-l>", actions.accept_copilot_line, { desc = "Accept next line of Copilot suggestion", silent = true })
+
 
 
 

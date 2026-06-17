@@ -24,9 +24,11 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Smart Clipboard Preservation**: Starting a selection caches the current clipboard registers. If you press `<Esc>` to cancel the selection, the clipboard is restored to its pre-selection state, preventing visual highlights from polluting your clipboard history.
 
 
-### 3. IntelliSense Suggestions Dismissal
+### 3. IntelliSense & Copilot Suggestions
 * **Dismiss Menu (`Ctrl+C`)**: If the completion suggestion list (`blink.cmp`) is active, pressing `<C-c>` closes/hides the menu while keeping you in insert mode. If the menu is closed, it drops you into normal mode.
 * **Dismiss Copilot Suggestions (`Alt+c`)**: Pressing `<M-c>` (Alt + c) in Insert mode cancels/dismisses the active Copilot inline completion suggestion.
+* **Accept Next Word of Copilot Suggestion (`Alt+w`)**: Pressing `<M-w>` (Alt + w) in Insert mode accepts the next word of Copilot's inline suggestion.
+* **Accept Next Line of Copilot Suggestion (`Alt+l`)**: Pressing `<M-l>` (Alt + l) in Insert mode accepts the next line of Copilot's inline suggestion.
 
 ### 4. Git Agent Review Mode
 * **Auto-Trigger**: On window focus (`FocusGained`), if there are unstaged changes matching files modified by the AI agent (tracked in the memory file `/dev/shm/agent_review_files.txt`), a prompt asks if you want to start a review.

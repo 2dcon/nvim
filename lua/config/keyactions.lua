@@ -909,6 +909,113 @@ function M.agent_review_stop(completed)
   end
 end
 
+-- Helper function to extract text and parse snippet if necessary
+local function get_completion_item_text(insert_text)
+  if type(insert_text) == 'string' then
+    return insert_text
+  elseif type(insert_text) == 'table' and type(insert_text.value) == 'string' then
+    return insert_text.value
+  end
+  return nil
+end
+
+function M.accept_copilot_word()
+  pcall(function()
+    vim.lsp.inline_completion.get({
+      on_accept = function(item)
+        local text = get_completion_item_text(item.insert_text)
+        if not text then return nil end
+
+        -- Calculate cursor offset relative to the start of the inline suggestion range
+        local prefix_len = 0
+        if item.range then
+          local start_row, start_col = item.range:to_extmark()
+          local cursor_pos = vim.api.nvim_win_get_cursor(0)
+          local cursor_row = cursor_pos[1] - 1
+          local cursor_col = cursor_pos[2]
+          if cursor_row == start_row then
+            prefix_len = math.max(0, cursor_col - start_col)
+          end
+        end
+
+        local prefix = text:sub(1, prefix_len)
+        local ghost_text = text:sub(prefix_len + 1)
+
+        -- Match next word of ghost text:
+        -- 1. Try to match leading spaces/tabs followed by word characters (letters, numbers, underscore)
+        local word = ghost_text:match("^[ \t]*[%w_]+")
+        if not (word and word ~= "") then
+          -- 2. Match leading spaces/tabs followed by non-word/non-space characters (operators/punctuation)
+          local non_word = ghost_text:match("^[ \t]*[^ \t%w_]+")
+          if non_word and non_word ~= "" then
+            local nl = non_word:find("\n")
+            if nl then
+              word = non_word:sub(1, nl - 1)
+            else
+              word = non_word
+            end
+          end
+        end
+
+        -- 3. Fallback: handle newline or first character
+        if not (word and word ~= "") then
+          if ghost_text:sub(1, 1) == "\n" then
+            word = "\n"
+          elseif ghost_text:sub(1, 2) == "\r\n" then
+            word = "\r\n"
+          else
+            word = ghost_text:sub(1, 1)
+          end
+        end
+
+        if word and word ~= "" then
+          item.insert_text = prefix .. word
+          return item
+        end
+        return nil
+      end
+    })
+  end)
+end
+
+function M.accept_copilot_line()
+  pcall(function()
+    vim.lsp.inline_completion.get({
+      on_accept = function(item)
+        local text = get_completion_item_text(item.insert_text)
+        if not text then return nil end
+
+        -- Calculate cursor offset relative to the start of the inline suggestion range
+        local prefix_len = 0
+        if item.range then
+          local start_row, start_col = item.range:to_extmark()
+          local cursor_pos = vim.api.nvim_win_get_cursor(0)
+          local cursor_row = cursor_pos[1] - 1
+          local cursor_col = cursor_pos[2]
+          if cursor_row == start_row then
+            prefix_len = math.max(0, cursor_col - start_col)
+          end
+        end
+
+        local prefix = text:sub(1, prefix_len)
+        local ghost_text = text:sub(prefix_len + 1)
+
+        -- Match next line of ghost text
+        local line = ghost_text:match("^[^\n]*\n")
+        if not line then
+          line = ghost_text
+        end
+
+        if line and line ~= "" then
+          item.insert_text = prefix .. line
+          return item
+        end
+        return nil
+      end
+    })
+  end)
+end
+
 return M
 
 
