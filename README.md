@@ -58,6 +58,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Global Hidden Cursor in Normal Mode**: Uses terminal escape sequences to completely hide the cursor in Normal mode globally across all buffers and sidebars, while restoring the cursor in all other modes (like Visual, Insert, and Command-line).
 * **Outline Auto-Jump**: Configured `outline.nvim` to automatically jump to the corresponding code symbol in the editor as soon as an item is selected or single-clicked in the outline sidebar. It automatically handles instant highlight updates and snaps the cursor column to 0 to prevent selection shifting issues.
 * **Vertical Scrollbar (`nvim-scrollbar`)**: Adds a visual vertical scrollbar on the right side of windows, showing indicators for search results, git signs, and LSP diagnostics.
+* **Absolute Line Numbers**: Configured the editor to show absolute line numbers globally instead of hybrid/relative line numbers.
 
 
 

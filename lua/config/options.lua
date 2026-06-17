@@ -11,3 +11,7 @@ opt.softtabstop = 4     -- Make Backspace/Tab handle 4 spaces at a time if encou
 
 -- Enter Select Mode (which allows typing to overwrite text) when selecting with mouse or shift-keys
 vim.opt.selectmode = "mouse,key"
+
+-- Line numbers configuration: show absolute line numbers everywhere
+vim.opt.number = true
+vim.opt.relativenumber = false
