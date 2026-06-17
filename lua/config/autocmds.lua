@@ -271,27 +271,6 @@ vim.api.nvim_create_autocmd({ "VimLeave", "VimSuspend" }, {
 -- Hide cursor immediately on load if starting in Normal mode
 hide_cursor()
 
--- Map single-click inside Outline buffer to select, or jump if already selected
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "Outline",
-  callback = function()
-    vim.keymap.set("n", "<LeftMouse>", function()
-      local pos = vim.fn.getmousepos()
-      if pos.winid == vim.api.nvim_get_current_win() and pos.line > 0 then
-        local current_line = vim.api.nvim_win_get_cursor(0)[1]
-        if pos.line == current_line then
-          -- Item was already selected, trigger the outline jump action
-          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "m", true)
-        else
-          -- Select/move cursor to the item in outline
-          vim.api.nvim_win_set_cursor(0, { pos.line, 0 })
-        end
-      end
-    end, { buffer = true, silent = true, desc = "Select item or jump to symbol if already selected" })
-  end,
-})
-
-
 
 
 
