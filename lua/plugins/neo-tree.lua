@@ -4,6 +4,7 @@ return {
     opts = {
       window = {
         mappings = {
+          ["<LeftMouse>"] = "open",
           ["Y"] = function(state)
             local node = state.tree:get_node()
             local filepath = node:get_id()
