@@ -281,9 +281,13 @@ hide_cursor()
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "Outline",
   callback = function()
+    -- Jump to symbol on double-click
     vim.keymap.set("n", "<2-LeftMouse>", "<CR>", { buffer = true, silent = true, remap = true, desc = "Jump to symbol on double-click" })
+    -- Disable drag-selection to prevent visual jumping glitches
+    vim.keymap.set("n", "<LeftDrag>", "<Nop>", { buffer = true, silent = true })
   end,
 })
+
 
 
 
