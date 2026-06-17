@@ -226,7 +226,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 -- Update outline selection highlight whenever the editor cursor's line changes
-vim.api.nvim_create_autocmd("CursorMoved", {
+vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
   group = vim.api.nvim_create_augroup("OutlineFollowCursorGlobal", { clear = true }),
   callback = function()
     local ok, outline = pcall(require, "outline")
