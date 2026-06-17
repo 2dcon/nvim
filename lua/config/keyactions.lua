@@ -894,43 +894,7 @@ function M.agent_review_stop(completed)
   end
 end
 
-function M.shift_click_selection()
-  local mouse = vim.fn.getmousepos()
-  if mouse.winid ~= vim.api.nvim_get_current_win() or mouse.line <= 0 or mouse.col <= 0 then
-    return
-  end
-
-  local mode = vim.api.nvim_get_mode().mode
-  local anchor_line, anchor_col
-
-  if mode:match("^[vVsS]") or mode == "\22" or mode == "\19" then
-    -- Already in selection mode, keep the current visual anchor
-    anchor_line = vim.fn.line("v")
-    anchor_col = vim.fn.col("v")
-  else
-    -- In insert/normal mode, start selection from current cursor position
-    local cursor = vim.api.nvim_win_get_cursor(0)
-    anchor_line = cursor[1]
-    anchor_col = cursor[2] + 1
-  end
-
-  -- Exit any active mode to normal mode safely
-  if mode:match("^[iIsSvV]") or mode == "\22" or mode == "\19" then
-    vim.cmd("normal! \27")
-  end
-
-  -- Save register states/clipboard
-  M.start_selection()
-
-  -- Position cursor at anchor, start visual highlight, and move cursor to clicked position
-  vim.api.nvim_win_set_cursor(0, { anchor_line, anchor_col - 1 })
-  vim.cmd("normal! v")
-  vim.api.nvim_win_set_cursor(0, { mouse.line, mouse.col - 1 })
-
-  -- Enter Select mode to follow standard selection behavior
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-g>", true, false, true), "n", false)
-end
-
 return M
+
 
 
