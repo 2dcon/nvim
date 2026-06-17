@@ -11,18 +11,3 @@ opt.softtabstop = 4     -- Make Backspace/Tab handle 4 spaces at a time if encou
 
 -- Enter Select Mode (which allows typing to overwrite text) when selecting with mouse or shift-keys
 vim.opt.selectmode = "mouse,key"
-
--- Create a highlight group for the cursor that inverts the character under it
-local function set_transparent_cursor_hl()
-  vim.api.nvim_set_hl(0, "CursorTransparent", { reverse = true })
-end
-set_transparent_cursor_hl()
-
-vim.api.nvim_create_autocmd("ColorScheme", {
-  callback = set_transparent_cursor_hl,
-})
-
--- Make the cursor invert the character in Normal mode globally across all buffers
-vim.opt.guicursor:append("n:block-CursorTransparent/lCursorTransparent")
-
-
