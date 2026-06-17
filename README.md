@@ -45,7 +45,8 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 ### 7. Layout & UI Customization
 * **Auto-Outline**: Automatically opens the outline sidebar pane on the right-hand side when opening directories.
 * **Darker Backgrounds**: The TokyoNight colorscheme is configured to use the `"night"` style variant for a much darker editing background.
-* **Global Inverting Block Cursor in Normal Mode**: Configures the cursor in Normal mode globally across all buffers, sidebars, and files to be an inverting block cursor. This ensures the text character underneath the cursor is always fully visible (by inverting its colors) instead of being hidden behind a solid color block.
+* **Global Hidden Cursor in Normal Mode**: Uses terminal escape sequences to completely hide the cursor in Normal mode globally across all buffers and sidebars. This ensures the cursor is completely transparent and the character underneath it is rendered normally without any blocks or lines, while restoring the cursor in all other modes (like Visual, Insert, and Command-line).
+
 
 
 

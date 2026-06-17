@@ -234,3 +234,47 @@ vim.api.nvim_create_autocmd("FocusGained", {
     end)
   end,
 })
+
+-- Option C: Completely hide/show terminal cursor globally in Normal mode
+local term_cursor_group = vim.api.nvim_create_augroup("TerminalCursorHide", { clear = true })
+
+local function hide_cursor()
+  if vim.api.nvim_get_mode().mode == "n" then
+    io.write("\27[?25l")
+  end
+end
+
+-- Hide on mode entry
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = term_cursor_group,
+  pattern = "*:n",
+  callback = hide_cursor,
+})
+
+-- Show on mode exit
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = term_cursor_group,
+  pattern = "n:*",
+  callback = function()
+    io.write("\27[?25h")
+  end,
+})
+
+-- Re-assert cursor hidden state on events that trigger redraws/focus changes
+vim.api.nvim_create_autocmd({ "CursorMoved", "WinEnter", "BufEnter", "SafeState", "VimResized" }, {
+  group = term_cursor_group,
+  callback = hide_cursor,
+})
+
+-- Ensure cursor is restored when leaving or suspending Neovim
+vim.api.nvim_create_autocmd({ "VimLeave", "VimSuspend" }, {
+  group = term_cursor_group,
+  callback = function()
+    io.write("\27[?25h")
+  end,
+})
+
+-- Hide cursor immediately on load if starting in Normal mode
+hide_cursor()
+
+
