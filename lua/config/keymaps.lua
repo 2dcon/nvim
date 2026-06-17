@@ -122,9 +122,12 @@ vim.keymap.set({ "n", "i", "v", "s" }, "<C-w>", actions.close_current_file, { de
 vim.keymap.set({ "v", "s" }, "<Esc>", actions.cancel_selection, { desc = "Cancel selection and restore clipboard" })
 ---- Cancel selection and restore clipboard with Escape ----
 
----- Shift+LeftMouse selection
-vim.keymap.set({ "i", "n", "s", "v" }, "<S-LeftMouse>", actions.shift_click_selection, { desc = "Extend selection to click position" })
----- Shift+LeftMouse selection ----
+---- Shift/Alt/Ctrl+LeftMouse selection
+vim.keymap.set({ "i", "n", "s", "v" }, "<S-LeftMouse>", actions.shift_click_selection, { desc = "Extend selection to click position (Shift)" })
+vim.keymap.set({ "i", "n", "s", "v" }, "<A-LeftMouse>", actions.shift_click_selection, { desc = "Extend selection to click position (Alt)" })
+vim.keymap.set({ "i", "n", "s", "v" }, "<C-LeftMouse>", actions.shift_click_selection, { desc = "Extend selection to click position (Ctrl)" })
+---- Shift/Alt/Ctrl+LeftMouse selection ----
+
 
 
 

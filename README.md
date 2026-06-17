@@ -21,8 +21,9 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 ### 2. Shift Selection (Keyboard text selection)
 * **Arrow Selection**: Holding `<S-Up>`, `<S-Down>`, `<S-Left>`, or `<S-Right>` in insert or normal mode initiates select mode (mimicking standard GUI editors).
 * **Home/End Selection**: `<S-Home>` and `<S-End>` select from the cursor position to the start or end of the line.
-* **Mouse Shift Selection**: Holding Shift and clicking a mouse position (`<S-LeftMouse>`) selects all text between the last cursor position (anchor) and the clicked position, working across both the same line and different lines.
+* **Mouse Shift/Alt/Ctrl Selection**: Holding Shift (`<S-LeftMouse>`), Alt (`<A-LeftMouse>`), or Ctrl (`<C-LeftMouse>`) and clicking a mouse position selects all text between the last cursor position (anchor) and the clicked position, working across both the same line and different lines.
 * **Smart Clipboard Preservation**: Starting a selection caches the current clipboard registers. If you press `<Esc>` to cancel the selection, the clipboard is restored to its pre-selection state, preventing visual highlights from polluting your clipboard history.
+
 
 
 ### 3. IntelliSense Suggestions Dismissal
