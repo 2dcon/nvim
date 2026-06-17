@@ -23,6 +23,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 ### 2. Shift Selection (Keyboard text selection)
 * **Arrow Selection**: Holding `<S-Up>`, `<S-Down>`, `<S-Left>`, or `<S-Right>` in insert or normal mode initiates select mode (mimicking standard GUI editors).
 * **Home/End Selection**: `<S-Home>` and `<S-End>` select from the cursor position to the start or end of the line.
+* **Outdent Selection (`Shift+Tab`)**: Pressing `<S-Tab>` in Visual or Select mode outdents the selected lines (removes a leading tab/indentation level) and maintains the active selection highlight.
 * **Smart Clipboard Preservation**: Starting a selection caches the current clipboard registers. If you press `<Esc>` to cancel the selection, the clipboard is restored to its pre-selection state, preventing visual highlights from polluting your clipboard history.
 
 

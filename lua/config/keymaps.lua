@@ -162,3 +162,6 @@ for key, val in pairs(wrap_pairs) do
   vim.keymap.set("s", key, string.format('<C-g>"xygv"_c%s%s<Esc>"xP', open_char, close_char), { desc = "Wrap selection in " .. open_char .. close_char })
 end
 
+-- MODERN EDITOR BEHAVIOR: Shift+Tab to outdent selected lines in Visual and Select modes
+vim.keymap.set("x", "<S-Tab>", "<gv", { desc = "Outdent selection" })
+vim.keymap.set("s", "<S-Tab>", "<C-g><gv<C-g>", { desc = "Outdent selection" })
