@@ -425,7 +425,15 @@ local function find_window_by_title(target_title)
   return nil, nil
 end
 
+local csharp_running = false
+
 function M.run_csharp_project(new_tab)
+  if csharp_running then
+    vim.notify("C# project build/run already in progress!", vim.log.levels.WARN)
+    return
+  end
+  csharp_running = true
+
   if new_tab == nil then
     new_tab = true
   end
@@ -434,6 +442,7 @@ function M.run_csharp_project(new_tab)
   
   if current_file == "" then
     vim.notify("No active file", vim.log.levels.WARN)
+    csharp_running = false
     return
   end
 
@@ -462,6 +471,7 @@ function M.run_csharp_project(new_tab)
 
   if not csproj_path then
     vim.notify("No csproj found after 4 iterations!", vim.log.levels.WARN)
+    csharp_running = false
     return
   end
 
@@ -474,6 +484,7 @@ function M.run_csharp_project(new_tab)
   local build_out = vim.fn.system(build_cmd)
   if vim.v.shell_error ~= 0 then
     vim.notify("Build failed:\n" .. build_out, vim.log.levels.ERROR)
+    csharp_running = false
     return
   end
 
@@ -482,6 +493,7 @@ function M.run_csharp_project(new_tab)
   local matches = vim.fn.glob(pattern, true, true)
   if #matches == 0 then
     vim.notify("Could not find compiled DLL matching " .. project_name .. ".dll", vim.log.levels.ERROR)
+    csharp_running = false
     return
   end
   table.sort(matches, function(a, b)
@@ -536,6 +548,7 @@ function M.run_csharp_project(new_tab)
     if vim.v.shell_error ~= 0 then
       vim.notify("Kitty execution failed: " .. output, vim.log.levels.ERROR)
       os.remove(temp_file)
+      csharp_running = false
       return
     end
   else
@@ -575,6 +588,7 @@ function M.run_csharp_project(new_tab)
       else
         vim.notify("Failed to launch kitty pane: " .. out, vim.log.levels.ERROR)
         os.remove(temp_file)
+        csharp_running = false
         return
       end
     end
@@ -605,6 +619,7 @@ function M.run_csharp_project(new_tab)
       cwd = csproj_dir,
       temp_file = temp_file, -- Store it on configuration so listener can access it
     })
+    csharp_running = false
   end, 200)
 end
 

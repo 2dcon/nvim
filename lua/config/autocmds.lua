@@ -402,18 +402,6 @@ vim.keymap.set({ "n", "v", "i", "x" }, "<RightMouse>", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<RightMouse>", true, false, true), "n", false)
 end, { desc = "Custom RightMouse to intercept Neo-tree clicks" })
 
-vim.keymap.set({ "n", "v", "i", "x" }, "<RightRelease>", function()
-  local pos = vim.fn.getmousepos()
-  if pos.winid > 0 and vim.api.nvim_win_is_valid(pos.winid) then
-    local target_buf = vim.api.nvim_win_get_buf(pos.winid)
-    local target_ft = vim.bo[target_buf].filetype
-    if target_ft == "neo-tree" then
-      return
-    end
-  end
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<RightRelease>", true, false, true), "n", false)
-end, { desc = "Custom RightRelease to intercept Neo-tree clicks" })
-
 
 
 

@@ -37,8 +37,8 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
   * `<F12>`: Discard/Reject all changes.
 
 ### 5. C# Execution Mappings
-* **Bottom Pane Run (`<F5>`)**: Compiles and executes the current C# project inside a bottom horizontal Kitty pane (`csharp_dbg_pane`). Reuses the pane (interrupted via Ctrl+C) if already open, adds execution headers, and closes when a key is pressed.
-* **New Tab Run (`<F6>`)**: Compiles and executes the current C# project inside a new Kitty terminal tab.
+* **Bottom Pane Run (`<F5>`)**: Compiles and executes the current C# project inside a bottom horizontal Kitty pane (`csharp_dbg_pane`). Reuses the pane (interrupted via Ctrl+C) if already open, adds execution headers, and closes when a key is pressed. Includes a mutual exclusion lock to prevent concurrent runs if both `<F5>` and `<F6>` are pressed together.
+* **New Tab Run (`<F6>`)**: Compiles and executes the current C# project inside a new Kitty terminal tab. Includes a mutual exclusion lock to prevent concurrent runs if both `<F5>` and `<F6>` are pressed together.
 
 ### 6. File Explorer Improvements (Neo-tree)
 * **Copy Paths (`Y`)**: Pressing `Y` inside Neo-tree opens a dropdown menu allowing you to copy the node's absolute path, relative path, or filename directly to the system clipboard.
