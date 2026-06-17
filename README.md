@@ -45,6 +45,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 ### 7. Layout & UI Customization
 * **Auto-Outline**: Automatically opens the outline sidebar pane on the right-hand side when opening directories.
 * **Darker Backgrounds**: The TokyoNight colorscheme is configured to use the `"night"` style variant for a much darker editing background.
-* **Hide Cursor in Sidebars**: Automatically hides the cursor in Neo-tree and Outline sidebar panels to make the layout cleaner, while ensuring the cursor remains visible in the command-line and other interactive areas.
+* **Global Invisible Cursor in Normal Mode**: Automatically hides the cursor in Normal mode globally across all files, editors, and sidebars (like Neo-tree and Outline), keeping it visible in other modes (such as Visual and Command-line).
+
 
 

@@ -12,4 +12,8 @@ opt.softtabstop = 4     -- Make Backspace/Tab handle 4 spaces at a time if encou
 -- Enter Select Mode (which allows typing to overwrite text) when selecting with mouse or shift-keys
 vim.opt.selectmode = "mouse,key"
 
+-- Create a transparent highlight group for the cursor
+vim.api.nvim_set_hl(0, "CursorTransparent", { fg = "NONE", bg = "NONE", blend = 100 })
 
+-- Make the cursor invisible in Normal mode globally across all buffers
+vim.opt.guicursor:append("n:ver1-CursorTransparent/lCursorTransparent")
