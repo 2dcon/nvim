@@ -286,6 +286,18 @@ vim.api.nvim_create_autocmd("FileType", {
     
     -- Disable drag-selection across modes to prevent visual jumping glitches
     vim.keymap.set({ "n", "v", "s", "x" }, "<LeftDrag>", "<Nop>", { buffer = true, silent = true })
+
+    -- Update outline highlights and snap cursor to column 0 on cursor move (fixes highlight and shift bugs)
+    vim.api.nvim_create_autocmd("CursorMoved", {
+      buffer = 0,
+      callback = function()
+        vim.schedule(function()
+          pcall(function()
+            require("outline").follow_cursor({ focus_outline = false })
+          end)
+        end)
+      end,
+    })
   end,
 })
 
