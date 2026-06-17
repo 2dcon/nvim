@@ -19,11 +19,12 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
   * `<BS>` / `<Del>` in select mode deletes selection and returns to insert mode.
 * **Auto Insert Mode on Click & Exit**: Clicking inside a regular editor pane or terminal pane automatically triggers Insert mode. Conversely, focusing non-editor/non-terminal panes (like Neo-tree or Outline) will automatically exit Insert mode.
 * **Wrap Selection on Type (`(`, `[`, `{`, `"`, `'`, `` ` ``)**: Typing an opening/closing parenthesis, bracket, brace, or quote character while text is selected (in Visual or Select mode) automatically encloses the selection in those characters instead of deleting/overwriting it.
+* **Insert Mode Outdent (`Shift+Tab`)**: Pressing `<S-Tab>` in Insert mode outdents the current line.
 
 ### 2. Shift Selection (Keyboard text selection)
 * **Arrow Selection**: Holding `<S-Up>`, `<S-Down>`, `<S-Left>`, or `<S-Right>` in insert or normal mode initiates select mode (mimicking standard GUI editors).
 * **Home/End Selection**: `<S-Home>` and `<S-End>` select from the cursor position to the start or end of the line.
-* **Outdent Selection (`Shift+Tab`)**: Pressing `<S-Tab>` in Visual or Select mode outdents the selected lines (removes a leading tab/indentation level) and maintains the active selection highlight.
+* **Indent / Outdent Selection (`Tab` / `Shift+Tab`)**: Pressing `<Tab>` or `<S-Tab>` in Visual or Select mode indents or outdents the selected lines while maintaining the active selection highlight.
 * **Smart Clipboard Preservation**: Starting a selection caches the current clipboard registers. If you press `<Esc>` to cancel the selection, the clipboard is restored to its pre-selection state, preventing visual highlights from polluting your clipboard history.
 
 
