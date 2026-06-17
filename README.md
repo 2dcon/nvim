@@ -12,8 +12,9 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
   * In Insert Mode: Toggles commenting on the current line and returns you to Insert mode at the exact same cursor column.
   * In Visual/Select Mode: Toggles commenting on the active selection.
 * **Undo (`Ctrl+Z`)**: Map `<C-z>` in normal, insert, and visual modes to perform standard undo.
-* **Copy/Paste (`Ctrl+C` / `Ctrl+V`)**:
+* **Copy/Cut/Paste (`Ctrl+C` / `Ctrl+X` / `Ctrl+V`)**:
   * `<C-c>` in visual/select modes copies the selection to the system clipboard and enters insert mode.
+  * `<C-x>` in visual/select modes cuts the selection to the system clipboard and enters insert mode.
   * `<C-v>` in insert/visual/select modes pastes the system clipboard (overwriting selection if active).
   * `<BS>` / `<Del>` in select mode deletes selection and returns to insert mode.
 * **Auto Insert Mode on Click & Exit**: Clicking inside a regular editor pane or terminal pane automatically triggers Insert mode. Conversely, focusing non-editor/non-terminal panes (like Neo-tree or Outline) will automatically exit Insert mode.
