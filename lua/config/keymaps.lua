@@ -122,6 +122,17 @@ vim.keymap.set({ "n", "i", "v", "s" }, "<C-w>", actions.close_current_file, { de
 vim.keymap.set({ "v", "s" }, "<Esc>", actions.cancel_selection, { desc = "Cancel selection and restore clipboard" })
 ---- Cancel selection and restore clipboard with Escape ----
 
+-- Dismiss Copilot inline suggestion in Insert mode using Alt+c
+vim.keymap.set("i", "<M-c>", function()
+  pcall(function()
+    vim.lsp.inline_completion.get({
+      on_accept = function()
+        return nil -- Aborts/dismisses the suggestion
+      end
+    })
+  end)
+end, { desc = "Dismiss Copilot suggestion", silent = true })
+
 
 
 

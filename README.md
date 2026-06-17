@@ -26,6 +26,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 
 ### 3. IntelliSense Suggestions Dismissal
 * **Dismiss Menu (`Ctrl+C`)**: If the completion suggestion list (`blink.cmp`) is active, pressing `<C-c>` closes/hides the menu while keeping you in insert mode. If the menu is closed, it drops you into normal mode.
+* **Dismiss Copilot Suggestions (`Alt+c`)**: Pressing `<M-c>` (Alt + c) in Insert mode cancels/dismisses the active Copilot inline completion suggestion.
 
 ### 4. Git Agent Review Mode
 * **Auto-Trigger**: On window focus (`FocusGained`), if there are unstaged changes matching files modified by the AI agent (tracked in the memory file `/dev/shm/agent_review_files.txt`), a prompt asks if you want to start a review.
