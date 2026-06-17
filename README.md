@@ -60,6 +60,7 @@ This is a highly customized Neovim configuration built on top of [LazyVim](https
 * **Vertical Scrollbar (`nvim-scrollview`)**: Adds an interactive vertical scrollbar on the right side of windows. Supports clicking and dragging to scroll/navigate the editor, and displays marks for search results, git conflicts, and LSP diagnostics.
 * **Absolute Line Numbers**: Configured the editor to show absolute line numbers globally instead of hybrid/relative line numbers.
 * **LSP Reference Highlights**: Overrode the LSP document reference highlights (`LspReferenceText`/`Read`/`Write`) to use reversed/inverted colors (swapping foreground and background) instead of solid background blocks, preventing contrast and readability conflicts on dimmed/unused variables and functions.
+* **Ignore Unused Variables for Reference Highlights**: Configured the LSP client to automatically disable document reference highlighting when the cursor is on an unused or deprecated variable/function (detected via LSP diagnostics), preventing visual clutter and highlighting issues on dead code.
 
 
 

@@ -402,6 +402,42 @@ vim.keymap.set({ "n", "v", "i", "x" }, "<RightMouse>", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<RightMouse>", true, false, true), "n", false)
 end, { desc = "Custom RightMouse to intercept Neo-tree clicks" })
 
+-- Override LSP document_highlight to ignore unused variables/functions under the cursor
+local original_doc_highlight = vim.lsp.buf.document_highlight
+vim.lsp.buf.document_highlight = function()
+  local buf = vim.api.nvim_get_current_buf()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local row = cursor[1] - 1
+  local col = cursor[2]
+
+  local diagnostics = vim.diagnostic.get(buf, { lnum = row })
+  for _, diag in ipairs(diagnostics) do
+    if col >= diag.col and col <= diag.end_col then
+      local is_unused = false
+      if diag.tags then
+        for _, tag in ipairs(diag.tags) do
+          if tag == 1 then -- 1 is vim.diagnostic.tags.Unnecessary
+            is_unused = true
+            break
+          end
+        end
+      end
+      if not is_unused and diag.message then
+        local msg = diag.message:lower()
+        if msg:find("unused") or msg:find("never used") or msg:find("is not read") or msg:find("never read") then
+          is_unused = true
+        end
+      end
+      if is_unused then
+        vim.lsp.buf.clear_references()
+        return
+      end
+    end
+  end
+
+  original_doc_highlight()
+end
+
 
 
 
