@@ -287,13 +287,43 @@ vim.api.nvim_create_autocmd("FileType", {
     -- Disable drag-selection across modes to prevent visual jumping glitches
     vim.keymap.set({ "n", "v", "s", "x" }, "<LeftDrag>", "<Nop>", { buffer = true, silent = true })
 
-    -- Update outline highlights and snap cursor to column 0 on cursor move (fixes highlight and shift bugs)
+    -- Update outline highlights and snap cursor column on cursor move (fixes highlight and shift bugs)
     vim.api.nvim_create_autocmd("CursorMoved", {
       buffer = 0,
       callback = function()
+        local outline = require("outline")
+        local sidebar = outline._get_sidebar()
+        if not sidebar then return end
+
+        -- 1. Snap cursor to correct column (0 or lineno offset)
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local target_col = 0
+        local outline_config = require("outline.config")
+        if outline_config.o.outline_items.show_symbol_lineno and sidebar.code.buf then
+          if vim.api.nvim_buf_is_valid(sidebar.code.buf) then
+            target_col = #tostring(vim.api.nvim_buf_line_count(sidebar.code.buf) - 1)
+          end
+        end
+
+        if cursor[2] ~= target_col then
+          vim.api.nvim_win_set_cursor(0, { cursor[1], target_col })
+        end
+
+        -- 2. Update the hovered item highlight according to the editor's cursor position
         vim.schedule(function()
           pcall(function()
-            require("outline").follow_cursor({ focus_outline = false })
+            if not (sidebar.view:is_open() and sidebar.flats) then return end
+            local code_win = sidebar.code.win
+            if not (code_win and vim.api.nvim_win_is_valid(code_win)) then return end
+
+            local hovered_line = vim.api.nvim_win_get_cursor(code_win)[1] - 1
+            for _, node in ipairs(sidebar.flats) do
+              node.hovered = (node.line == hovered_line or (hovered_line >= node.range_start and hovered_line <= node.range_end))
+            end
+
+            local hl = require("outline.highlight")
+            hl.clear_hovers(sidebar.view.buf)
+            hl.hovers(sidebar.view.buf, sidebar.flats)
           end)
         end)
       end,
