@@ -253,13 +253,30 @@ vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 
     pcall(function()
       local hovered_line = current_line - 1
+      local target_node
       for _, node in ipairs(sidebar.flats) do
-        node.hovered = (node.line == hovered_line or (hovered_line >= node.range_start and hovered_line <= node.range_end))
+        local is_hovered = (node.line == hovered_line or (hovered_line >= node.range_start and hovered_line <= node.range_end))
+        node.hovered = is_hovered
+        if is_hovered then
+          target_node = node
+        end
       end
 
       local hl = require("outline.highlight")
       hl.clear_hovers(sidebar.view.buf)
       hl.hovers(sidebar.view.buf, sidebar.flats)
+
+      -- Move the outline window's cursor to target_node's line
+      if target_node and sidebar.view.win and vim.api.nvim_win_is_valid(sidebar.view.win) then
+        local target_col = 0
+        local outline_config = require("outline.config")
+        if outline_config.o.outline_items.show_symbol_lineno and sidebar.code.buf then
+          if vim.api.nvim_buf_is_valid(sidebar.code.buf) then
+            target_col = #tostring(vim.api.nvim_buf_line_count(sidebar.code.buf) - 1)
+          end
+        end
+        vim.api.nvim_win_set_cursor(sidebar.view.win, { target_node.line_in_outline, target_col })
+      end
     end)
   end,
 })
